@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ScholarTrack — Every Child, Accounted For</title>
-<meta name="description" content="Real-time school transport safety for South African schools. Live bus tracking, emergency SOS, and instant parent notifications.">
+<meta name="description" content="South Africa's school transport marketplace. Parents hire verified drivers with private vehicles. Real-time tracking, emergency SOS, and instant notifications.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Epilogue:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -773,58 +773,56 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
   <div class="hero-glow-amber"></div>
   <div class="hero-glow-green"></div>
 
-  <!-- 3D Low-poly bus SVG -->
+  <!-- Private car SVG — individual driver vehicle with ScholarTrack branding -->
   <div class="hero-3d-bus">
     <svg width="340" height="200" viewBox="0 0 340 200" fill="none" xmlns="http://www.w3.org/2000/svg">
       <!-- shadow -->
-      <ellipse cx="170" cy="190" rx="120" ry="10" fill="rgba(0,0,0,.12)"/>
-      <!-- bus body main -->
-      <rect x="30" y="70" width="280" height="90" rx="12" fill="#FFC107"/>
-      <!-- bus roof cab -->
-      <rect x="50" y="42" width="160" height="34" rx="8" fill="#FFC107"/>
-      <!-- front windshield -->
-      <rect x="200" y="48" width="48" height="26" rx="4" fill="#E3F2FD" opacity=".85"/>
-      <!-- driver door window -->
-      <rect x="52" y="48" width="40" height="22" rx="3" fill="#E3F2FD" opacity=".75"/>
-      <!-- side windows -->
-      <rect x="98" y="48" width="40" height="22" rx="3" fill="#E3F2FD" opacity=".75"/>
-      <rect x="144" y="48" width="40" height="22" rx="3" fill="#E3F2FD" opacity=".75"/>
+      <ellipse cx="170" cy="190" rx="120" ry="10" fill="rgba(0,0,0,.1)"/>
+      <!-- car body -->
+      <rect x="25" y="95" width="290" height="68" rx="22" fill="#FFC107"/>
+      <!-- cabin / roof -->
+      <rect x="60" y="52" width="210" height="50" rx="18" fill="#FFC107"/>
+      <!-- ScholarTrack logo circle on door -->
+      <circle cx="170" cy="125" r="20" fill="#e6a800" opacity=".45"/>
+      <text x="170" y="130" font-family="sans-serif" font-size="12" font-weight="800" fill="#1a1f2e" text-anchor="middle" letter-spacing=".5">ST</text>
+      <!-- windshield -->
+      <rect x="230" y="58" width="78" height="38" rx="10" fill="#E3F2FD" opacity=".85"/>
+      <!-- side windows strip -->
+      <rect x="65" y="58" width="160" height="38" rx="10" fill="#E3F2FD" opacity=".75"/>
       <!-- rear window -->
-      <rect x="254" y="48" width="36" height="26" rx="4" fill="#E3F2FD" opacity=".6"/>
-      <!-- ScholarTrack logo on side -->
-      <rect x="98" y="88" width="80" height="18" rx="4" fill="rgba(0,0,0,.12)"/>
-      <text x="138" y="101" font-family="sans-serif" font-size="9" font-weight="bold" fill="rgba(0,0,0,.4)" text-anchor="middle">SCHOLARTRACK</text>
+      <rect x="62" y="58" width="50" height="38" rx="8" fill="#E3F2FD" opacity=".6"/>
       <!-- wheels -->
-      <circle cx="90" cy="163" r="22" fill="#2a2a2a"/>
-      <circle cx="90" cy="163" r="14" fill="#3d3d3d"/>
-      <circle cx="90" cy="163" r="7" fill="#555"/>
-      <circle cx="90" cy="163" r="3" fill="#777"/>
-      <circle cx="250" cy="163" r="22" fill="#2a2a2a"/>
-      <circle cx="250" cy="163" r="14" fill="#3d3d3d"/>
-      <circle cx="250" cy="163" r="7" fill="#555"/>
-      <circle cx="250" cy="163" r="3" fill="#777"/>
-      <!-- wheel wells -->
-      <path d="M62 162 Q90 140 118 162" stroke="rgba(0,0,0,.1)" stroke-width="3" fill="none"/>
-      <path d="M222 162 Q250 140 278 162" stroke="rgba(0,0,0,.1)" stroke-width="3" fill="none"/>
-      <!-- headlight -->
-      <rect x="268" y="90" width="12" height="18" rx="3" fill="#FFF9C4" opacity=".9"/>
-      <!-- tail light -->
-      <rect x="28" y="90" width="8" height="18" rx="2" fill="#F44336" opacity=".8"/>
-      <!-- door -->
-      <rect x="55" y="76" width="32" height="55" rx="3" fill="rgba(0,0,0,.08)"/>
-      <rect x="59" y="80" width="24" height="22" rx="2" fill="#E3F2FD" opacity=".6"/>
-      <!-- GPS pin floating -->
-      <g transform="translate(300,30)" class="gps-float">
+      <circle cx="92" cy="163" r="26" fill="#2a2a2a"/>
+      <circle cx="92" cy="163" r="17" fill="#3d3d3d"/>
+      <circle cx="92" cy="163" r="8" fill="#555"/>
+      <circle cx="92" cy="163" r="4" fill="#777"/>
+      <circle cx="248" cy="163" r="26" fill="#2a2a2a"/>
+      <circle cx="248" cy="163" r="17" fill="#3d3d3d"/>
+      <circle cx="248" cy="163" r="8" fill="#555"/>
+      <circle cx="248" cy="163" r="4" fill="#777"/>
+      <!-- wheel wells shadow -->
+      <path d="M68 163 Q92 146 116 163" stroke="rgba(0,0,0,.1)" stroke-width="3" fill="none"/>
+      <path d="M224 163 Q248 146 272 163" stroke="rgba(0,0,0,.1)" stroke-width="3" fill="none"/>
+      <!-- headlights -->
+      <rect x="292" y="108" width="14" height="22" rx="6" fill="#FFF9C4" opacity=".9"/>
+      <rect x="292" y="134" width="14" height="10" rx="5" fill="#FFF9C4" opacity=".55"/>
+      <!-- tail lights -->
+      <rect x="38" y="110" width="10" height="22" rx="5" fill="#F44336" opacity=".8"/>
+      <rect x="38" y="136" width="10" height="10" rx="5" fill="#F44336" opacity=".45"/>
+      <!-- road reflection -->
+      <rect x="25" y="163" width="290" height="4" rx="2" fill="rgba(0,0,0,.07)"/>
+      <!-- floating GPS pins -->
+      <g transform="translate(310,30)" class="gps-float">
         <circle r="8" fill="#2196F3" opacity=".25"/>
         <circle r="5" fill="#2196F3" opacity=".5"/>
         <circle r="3" fill="#2196F3"/>
       </g>
-      <g transform="translate(20,55)" class="gps-float2">
+      <g transform="translate(20,50)" class="gps-float2">
         <circle r="6" fill="#2E7D32" opacity=".25"/>
         <circle r="4" fill="#2E7D32" opacity=".5"/>
         <circle r="2.5" fill="#2E7D32"/>
       </g>
-      <g transform="translate(310,100)" class="gps-float3">
+      <g transform="translate(295,90)" class="gps-float3">
         <circle r="6" fill="#FFC107" opacity=".25"/>
         <circle r="4" fill="#FFC107" opacity=".5"/>
         <circle r="2.5" fill="#FFC107"/>
@@ -848,9 +846,8 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
       <span class="b">Accounted For.</span>
     </h1>
     <p class="hero-sub">
-      Real-time school transport safety for South African schools.
-      <strong>Live bus positions. Emergency SOS. Instant parent notifications.</strong>
-      No missed calls. No guessing. Just certainty.
+      A marketplace for verified private car drivers serving South African schools.
+      <strong>Parents hire trusted drivers. Drivers earn from their cars. Children travel safely.</strong>
     </p>
     <div class="hero-actions">
       <a href="#cta" class="btn-primary">
@@ -870,12 +867,12 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
       <div class="counter-sep"></div>
       <div class="hero-counter">
         <div class="counter-n"><span id="hc-buses">0</span></div>
-        <div class="counter-l">Active Buses</div>
+        <div class="counter-l">Verified Drivers</div>
       </div>
       <div class="counter-sep"></div>
       <div class="hero-counter">
         <div class="counter-n"><span id="hc-schools">0</span></div>
-        <div class="counter-l">Schools Live</div>
+        <div class="counter-l">Schools Active</div>
       </div>
     </div>
   </div>
@@ -889,17 +886,17 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
 <!-- TICKER -->
 <div class="ticker-strip">
   <div class="ticker-track">
-    <span class="s">&#9670;</span> Real-time GPS Tracking &nbsp;&nbsp;
+    <span class="s">&#9670;</span> Driver Marketplace &nbsp;&nbsp;
     <span class="s">&#9670;</span> Emergency SOS &nbsp;&nbsp;
     <span class="s">&#9670;</span> Parent Notifications &nbsp;&nbsp;
-    <span class="s">&#9670;</span> Driver Dashboards &nbsp;&nbsp;
-    <span class="s">&#9670;</span> Admin Control Panel &nbsp;&nbsp;
+    <span class="s">&#9670;</span> Verified Drivers &nbsp;&nbsp;
+    <span class="s">&#9670;</span> Admin Dashboard &nbsp;&nbsp;
     <span class="s">&#9670;</span> POPIA Compliant &nbsp;&nbsp;
-    <span class="s">&#9670;</span> Real-time GPS Tracking &nbsp;&nbsp;
+    <span class="s">&#9670;</span> Driver Marketplace &nbsp;&nbsp;
     <span class="s">&#9670;</span> Emergency SOS &nbsp;&nbsp;
     <span class="s">&#9670;</span> Parent Notifications &nbsp;&nbsp;
-    <span class="s">&#9670;</span> Driver Dashboards &nbsp;&nbsp;
-    <span class="s">&#9670;</span> Admin Control Panel &nbsp;&nbsp;
+    <span class="s">&#9670;</span> Verified Drivers &nbsp;&nbsp;
+    <span class="s">&#9670;</span> Admin Dashboard &nbsp;&nbsp;
     <span class="s">&#9670;</span> POPIA Compliant
   </div>
 </div>
@@ -912,7 +909,7 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
         <svg viewBox="0 0 24 24" fill="none" stroke="#FFC107" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="22" height="12" rx="3"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
       </div>
       <div class="stat-n" data-target="12" data-sfx="">0</div>
-      <div class="stat-l">Buses Deployed</div>
+      <div class="stat-l">Verified Drivers</div>
     </div>
     <div class="stat-block reveal" style="transition-delay:.08s">
       <div class="stat-icon" style="background:rgba(46,125,50,.15)">
@@ -950,9 +947,9 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
   <div class="inner">
     <div class="section-header">
       <div>
-        <div class="sec-tag reveal">01 — Live Fleet Map</div>
-        <h2 class="sec-title reveal" style="transition-delay:.1s">Every Bus,<br><span class="d">On The Map.</span></h2>
-        <p class="sec-body reveal" style="transition-delay:.15s">Watch all active buses in real time. Parents see exactly where their children are, every moment of every journey.</p>
+        <div class="sec-tag reveal">01 — Live Driver Map</div>
+        <h2 class="sec-title reveal" style="transition-delay:.1s">Every Driver,<br><span class="d">On The Map.</span></h2>
+        <p class="sec-body reveal" style="transition-delay:.15s">Watch all active drivers in real time. Parents see exactly where their children are, every moment of every journey.</p>
       </div>
     </div>
 
@@ -960,47 +957,47 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
       <div class="live-map-card">
         <div class="map-header">
           <div class="map-h-dot"></div>
-          <div class="map-h-title">Live Fleet — Gauteng</div>
+          <div class="map-h-title">Live Driver Network — Gauteng</div>
           <div class="map-h-live">Live</div>
         </div>
         <div id="leaflet-map"></div>
         <div class="map-bus-list">
           <div class="map-bus-card" id="mb-a">
             <div class="map-bc-icon">
-              <svg viewBox="0 0 42 26" fill="none"><rect x="1" y="5" width="40" height="16" rx="4" fill="#FFC107"/><rect x="3" y="1" width="20" height="7" rx="2" fill="#FFC107"/><circle cx="10" cy="22" r="3" fill="#333"/><circle cx="32" cy="22" r="3" fill="#333"/><rect x="6" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/><rect x="15" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/><rect x="24" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/></svg>
+              <svg viewBox="0 0 42 22" fill="none"><rect x="1" y="4" width="40" height="14" rx="7" fill="#FFC107"/><rect x="4" y="1" width="22" height="10" rx="5" fill="#FFC107"/><rect x="6" y="2" width="10" height="7" rx="2" fill="#E3F2FD" opacity=".8"/><circle cx="10" cy="18" r="3" fill="#333"/><circle cx="32" cy="18" r="3" fill="#333"/><rect x="32" y="5" width="6" height="5" rx="2" fill="#FFF9C4" opacity=".8"/></svg>
             </div>
             <div class="map-bc-info">
-              <div class="map-bc-route">Bus A — Fourways Route</div>
+              <div class="map-bc-route">Thabo M. — Fourways Route</div>
               <div class="map-bc-meta">Midrand Primary &bull; 14 students</div>
             </div>
             <div class="map-bc-eta">3m<span>ETA</span></div>
           </div>
           <div class="map-bus-card" id="mb-b">
             <div class="map-bc-icon">
-              <svg viewBox="0 0 42 26" fill="none"><rect x="1" y="5" width="40" height="16" rx="4" fill="#2196F3"/><rect x="3" y="1" width="20" height="7" rx="2" fill="#2196F3"/><circle cx="10" cy="22" r="3" fill="#333"/><circle cx="32" cy="22" r="3" fill="#333"/><rect x="6" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/><rect x="15" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/><rect x="24" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/></svg>
+              <svg viewBox="0 0 42 22" fill="none"><rect x="1" y="4" width="40" height="14" rx="7" fill="#2196F3"/><rect x="4" y="1" width="22" height="10" rx="5" fill="#2196F3"/><rect x="6" y="2" width="10" height="7" rx="2" fill="#E3F2FD" opacity=".8"/><circle cx="10" cy="18" r="3" fill="#333"/><circle cx="32" cy="18" r="3" fill="#333"/><rect x="32" y="5" width="6" height="5" rx="2" fill="#FFF9C4" opacity=".8"/></svg>
             </div>
             <div class="map-bc-info">
-              <div class="map-bc-route">Bus B — Sandton Route</div>
+              <div class="map-bc-route">Amahle N. — Sandton Route</div>
               <div class="map-bc-meta">Centurion Academy &bull; 11 students</div>
             </div>
             <div class="map-bc-eta">8m<span>ETA</span></div>
           </div>
           <div class="map-bus-card" id="mb-c">
             <div class="map-bc-icon">
-              <svg viewBox="0 0 42 26" fill="none"><rect x="1" y="5" width="40" height="16" rx="4" fill="#2E7D32"/><rect x="3" y="1" width="20" height="7" rx="2" fill="#2E7D32"/><circle cx="10" cy="22" r="3" fill="#333"/><circle cx="32" cy="22" r="3" fill="#333"/><rect x="6" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/><rect x="15" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/><rect x="24" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/></svg>
+              <svg viewBox="0 0 42 22" fill="none"><rect x="1" y="4" width="40" height="14" rx="7" fill="#2E7D32"/><rect x="4" y="1" width="22" height="10" rx="5" fill="#2E7D32"/><rect x="6" y="2" width="10" height="7" rx="2" fill="#E3F2FD" opacity=".8"/><circle cx="10" cy="18" r="3" fill="#333"/><circle cx="32" cy="18" r="3" fill="#333"/><rect x="32" y="5" width="6" height="5" rx="2" fill="#FFF9C4" opacity=".8"/></svg>
             </div>
             <div class="map-bc-info">
-              <div class="map-bc-route">Bus C — Randburg Route</div>
+              <div class="map-bc-route">Lucky K. — Randburg Route</div>
               <div class="map-bc-meta">Tshwane North Primary &bull; 9 students</div>
             </div>
             <div class="map-bc-eta dly">+7m<span>Delayed</span></div>
           </div>
           <div class="map-bus-card" id="mb-d">
             <div class="map-bc-icon">
-              <svg viewBox="0 0 42 26" fill="none"><rect x="1" y="5" width="40" height="16" rx="4" fill="#F44336"/><rect x="3" y="1" width="20" height="7" rx="2" fill="#F44336"/><circle cx="10" cy="22" r="3" fill="#333"/><circle cx="32" cy="22" r="3" fill="#333"/><rect x="6" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/><rect x="15" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/><rect x="24" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/></svg>
+              <svg viewBox="0 0 42 22" fill="none"><rect x="1" y="4" width="40" height="14" rx="7" fill="#F44336"/><rect x="4" y="1" width="22" height="10" rx="5" fill="#F44336"/><rect x="6" y="2" width="10" height="7" rx="2" fill="#E3F2FD" opacity=".8"/><circle cx="10" cy="18" r="3" fill="#333"/><circle cx="32" cy="18" r="3" fill="#333"/><rect x="32" y="5" width="6" height="5" rx="2" fill="#FFF9C4" opacity=".8"/></svg>
             </div>
             <div class="map-bc-info">
-              <div class="map-bc-route">Bus D — N14 Emergency</div>
+              <div class="map-bc-route"> Sipho R. — N14 Route</div>
               <div class="map-bc-meta">Tshwane North Primary &bull; 6 students</div>
             </div>
             <div class="map-bc-eta sos">SOS<span>Active</span></div>
@@ -1041,7 +1038,7 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
           <div class="sch-live">Live</div>
         </div>
         <div class="sch-card-body">
-          <div class="sch-metric"><div class="sch-mv">4</div><div class="sch-ml">Buses</div></div>
+          <div class="sch-metric"><div class="sch-mv">4</div><div class="sch-ml">Drivers</div></div>
           <div class="sch-div"></div>
           <div class="sch-metric"><div class="sch-mv">89</div><div class="sch-ml">Students</div></div>
           <div class="sch-div"></div>
@@ -1065,7 +1062,7 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
           <div class="sch-live">Live</div>
         </div>
         <div class="sch-card-body">
-          <div class="sch-metric"><div class="sch-mv">5</div><div class="sch-ml">Buses</div></div>
+          <div class="sch-metric"><div class="sch-mv">5</div><div class="sch-ml">Drivers</div></div>
           <div class="sch-div"></div>
           <div class="sch-metric"><div class="sch-mv">102</div><div class="sch-ml">Students</div></div>
           <div class="sch-div"></div>
@@ -1089,7 +1086,7 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
           <div class="sch-live">Live</div>
         </div>
         <div class="sch-card-body">
-          <div class="sch-metric"><div class="sch-mv">3</div><div class="sch-ml">Buses</div></div>
+          <div class="sch-metric"><div class="sch-mv">3</div><div class="sch-ml">Drivers</div></div>
           <div class="sch-div"></div>
           <div class="sch-metric"><div class="sch-mv">56</div><div class="sch-ml">Students</div></div>
           <div class="sch-div"></div>
@@ -1123,7 +1120,7 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
                 <p class="sos-hint">Tap to trigger SOS alert</p>
               </div>
               <div class="sos-info-box">
-                <div class="sos-info-title">Bus D — SOS Active</div>
+                <div class="sos-info-title">Sipho R. — SOS Active</div>
                 <div class="sos-info-text">Location shared with school admin and all emergency contacts. Police notified automatically.</div>
               </div>
               <div class="sos-info-box ok">
@@ -1195,8 +1192,8 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             </div>
             <div class="notify-type-text">
-              <strong>Bus Departed Alert</strong>
-              "Bus A has left Centurion Academy with 11 students. Live tracking is now active."
+              <strong>Driver Departed Alert</strong>
+              "Thabo M. has left Centurion Academy with 11 students. Live tracking is now active."
             </div>
           </div>
           <div class="notify-type">
@@ -1205,7 +1202,7 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
             </div>
             <div class="notify-type-text">
               <strong>5 Minutes Away</strong>
-              "Bus A is 5 minutes from your stop on Kingfisher Road. Please have Lerato ready."
+              "Thabo M. is 5 minutes from your stop on Kingfisher Road. Please have Lerato ready."
             </div>
           </div>
           <div class="notify-type">
@@ -1214,7 +1211,7 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
             </div>
             <div class="notify-type-text">
               <strong>Drop-off Confirmation</strong>
-              "Lerato has been dropped off safely at Oak Avenue stop. Bus A has departed."
+              "Lerato has been dropped off safely at Oak Avenue stop. Thabo M. has departed."
             </div>
           </div>
         </div>
@@ -1226,7 +1223,7 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
           <div class="notify-screen">
             <div class="notify-ph">
               <div class="notify-app-icon">
-                <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="9" rx="2" fill="#FFC107"/><circle cx="4" cy="13" r="1.5" fill="#333"/><circle cx="12" cy="13" r="1.5" fill="#333"/></svg>
+                <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="5" width="14" height="7" rx="3.5" fill="#FFC107"/><rect x="3" y="2" width="8" height="5" rx="2.5" fill="#FFC107"/><circle cx="4" cy="12" r="1.5" fill="#333"/><circle cx="12" cy="12" r="1.5" fill="#333"/></svg>
               </div>
               <div class="notify-app-name">ScholarTrack</div>
               <div class="notify-time">now</div>
@@ -1239,8 +1236,8 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
                   <span class="notify-card-from">ScholarTrack</span>
                 </div>
                 <div class="notify-card-body">
-                  <div class="notify-card-title">Bus A has departed</div>
-                  <div class="notify-card-msg">Fourways Route — 12 students on board. Live tracking is now active.</div>
+                  <div class="notify-card-title">Thabo M. has departed</div>
+                  <div class="notify-card-msg">Fourways Route — 14 students on board. Live tracking is now active.</div>
                 </div>
                 <div class="notify-card-ftr">
                   <span class="notify-card-time">7:14 AM</span>
@@ -1255,7 +1252,7 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
                 </div>
                 <div class="notify-card-body">
                   <div class="notify-card-title">5 minutes away</div>
-                  <div class="notify-card-msg">Bus A is approaching your stop on Kingfisher Road. Please have Lerato ready.</div>
+                  <div class="notify-card-msg">Thabo M. is approaching your stop on Kingfisher Road. Please have Lerato ready.</div>
                 </div>
                 <div class="notify-card-ftr">
                   <span class="notify-card-time">7:31 AM</span>
@@ -1270,7 +1267,7 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
                 </div>
                 <div class="notify-card-body">
                   <div class="notify-card-title">Lerato dropped off safely</div>
-                  <div class="notify-card-msg">Bus A has departed the Oak Avenue stop. Have a great day at school!</div>
+                  <div class="notify-card-msg">Thabo M. has departed the Oak Avenue stop. Have a great day at school!</div>
                 </div>
                 <div class="notify-card-ftr">
                   <span class="notify-card-time">7:38 AM</span>
@@ -1568,13 +1565,13 @@ function initMap() {
 
   /* Route paths (LineStrings approximated) */
   const routes = [
-    // Bus A — Fourways to Midrand Primary
+    // Thabo M. — Fourways to Midrand Primary
     L.polyline([[-25.97, 27.99], [-25.96, 28.01], [-25.955, 28.04], [-25.953, 28.07], [-25.95, 28.10], [-25.948, 28.13]], { color: '#FFC107', weight: 3, opacity: 0.6 }),
-    // Bus B — Sandton to Centurion
+    // Amahle N. — Sandton to Centurion
     L.polyline([[-26.02, 27.99], [-26.0, 28.05], [-25.97, 28.09], [-25.94, 28.13], [-25.91, 28.17]], { color: '#2196F3', weight: 3, opacity: 0.6 }),
-    // Bus C — Randburg to Tshwane North
+    // Lucky K. — Randburg to Tshwane North
     L.polyline([[-26.05, 27.97], [-26.02, 28.01], [-25.99, 28.05], [-25.97, 28.09], [-25.95, 28.12]], { color: '#2E7D32', weight: 3, opacity: 0.6 }),
-    // Bus D — N14 Emergency route
+    // Sipho R. — N14 Emergency route
     L.polyline([[-25.93, 28.08], [-25.91, 28.11], [-25.89, 28.14], [-25.87, 28.17]], { color: '#F44336', weight: 3, opacity: 0.7, dashArray: '6,4' }),
   ];
   routes.forEach(r => r.addTo(map));
@@ -1624,16 +1621,15 @@ function initMap() {
       iconAnchor: [30, 30]
     });
 
-    // Bus SVG marker
+    // Driver car SVG marker
     const busColor = b.color;
-    const busSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="26" viewBox="0 0 42 26">
-      <rect x="1" y="5" width="40" height="16" rx="4" fill="${busColor}"/>
-      <rect x="3" y="1" width="20" height="7" rx="2" fill="${busColor}"/>
-      <circle cx="10" cy="22" r="3" fill="#222"/>
-      <circle cx="32" cy="22" r="3" fill="#222"/>
-      <rect x="6" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/>
-      <rect x="15" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/>
-      <rect x="24" y="8" width="7" height="5" rx="1.5" fill="white" opacity=".7"/>
+    const busSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="22" viewBox="0 0 42 22">
+      <rect x="1" y="4" width="40" height="14" rx="7" fill="${busColor}"/>
+      <rect x="4" y="1" width="22" height="10" rx="5" fill="${busColor}"/>
+      <rect x="6" y="2" width="10" height="7" rx="2" fill="#E3F2FD" opacity=".8"/>
+      <circle cx="10" cy="18" r="3" fill="#222"/>
+      <circle cx="32" cy="18" r="3" fill="#222"/>
+      <rect x="32" y="5" width="6" height="5" rx="2" fill="#FFF9C4" opacity=".8"/>
     </svg>`;
 
     const busIcon = L.divIcon({
