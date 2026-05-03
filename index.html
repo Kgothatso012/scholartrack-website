@@ -40,7 +40,7 @@
   --text2:    #4a5568;
   --muted:    #8a94a6;
   --road:     rgba(10,37,64,0.05);
-  --clash:    'Clash Display', sans-serif;
+  --clash:    'Syne', 'Cabinet Grotesk', sans-serif;
   --general:  'General Sans', sans-serif;
   --mono:     'DM Mono', monospace;
   --ease:     cubic-bezier(0.16, 1, 0.3, 1);
@@ -110,11 +110,19 @@ body::before{
 }
 .hero-bg{
   position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 70% at 70% 40%,rgba(212,175,55,0.06) 0%,transparent 60%),
-              radial-gradient(ellipse 60% 50% at 30% 60%,rgba(46,125,50,0.04) 0%,transparent 50%),
-              repeating-linear-gradient(0deg,var(--border) 1px,transparent 1px),
-              repeating-linear-gradient(90deg,var(--border) 1px,transparent 1px);
-  background-size:100% 100%,100% 100%,60px 60px,60px 60px
+  background:
+    radial-gradient(ellipse 80% 70% at 70% 40%,rgba(212,175,55,0.07) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 30% 60%,rgba(46,125,50,0.05) 0%,transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 100%,rgba(10,37,64,0.04) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,var(--border) 1px,transparent 1px),
+    repeating-linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:100% 100%,100% 100%,100% 100%,60px 60px,60px 60px;
+  animation:bgShift 18s ease-in-out infinite alternate
+}
+@keyframes bgShift{
+  0%{background-position:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%}
+  50%{background-position:2% -1%,-1% 2%,1% 1%,0% 0%,0% 0%}
+  100%{background-position:-1% 1%,1% -1%,-1% -1%,0% 0%,0% 0%}
 }
 .hero-left{position:relative;z-index:2;max-width:580px}
 .hero-eyebrow{
@@ -204,12 +212,21 @@ body::before{
 }
 
 /* Hero right — Map preview */
-.hero-right{position:relative;z-index:2;height:100%}
+.hero-right{
+  position:relative;z-index:2;height:100%;
+  display:flex;align-items:center
+}
 /* Live Activity Feed */
 .hero-feed-wrap{
   border-radius:20px;overflow:hidden;
   border:1.5px solid var(--border);
-  box-shadow:var(--shadow-lg);background:var(--white)
+  box-shadow:var(--shadow-lg);background:var(--white);
+  position:relative
+}
+.hero-feed-wrap::before{
+  content:'';position:absolute;inset:-12px;
+  background:radial-gradient(ellipse at center,rgba(212,175,55,.04) 0%,transparent 70%);
+  pointer-events:none;z-index:-1
 }
 .feed-header{
   padding:1rem 1.4rem;display:flex;align-items:center;gap:.7rem;
@@ -684,13 +701,58 @@ body::before{
 .testi-play svg{width:10px;height:10px;fill:var(--gold);margin-left:2px}
 
 /* ─────────────────────────────────────────────────────
+   TRUST STRIP
+───────────────────────────────────────────────────── */
+.trust-strip{
+  padding:3.5rem 0;background:var(--white);
+  border-bottom:1px solid var(--border)
+}
+.trust-inner{max-width:1300px;margin:0 auto;padding:0 5vw}
+.trust-label{
+  text-align:center;
+  font-family:var(--general);font-size:.62rem;font-weight:600;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:2rem
+}
+.trust-logos{
+  display:flex;justify-content:center;align-items:center;gap:4rem;
+  flex-wrap:wrap
+}
+.trust-logo{
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  opacity:.5;transition:opacity .3s
+}
+.trust-logo:hover{opacity:.85}
+.trust-logo-icon{
+  width:44px;height:44px;background:var(--surface);
+  border:1px solid var(--border);border-radius:12px;
+  display:flex;align-items:center;justify-content:center
+}
+.trust-logo-icon svg{width:20px;height:20px;stroke:var(--muted);stroke-width:1.5}
+.trust-logo-name{
+  font-family:var(--clash);font-size:.72rem;font-weight:600;color:var(--text)
+}
+.trust-badge{
+  font-family:var(--general);font-size:.55rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--safe);background:var(--safe-lt);
+  border:1px solid rgba(46,125,50,.15);
+  padding:.1rem .45rem;border-radius:20px
+}
+
+/* ─────────────────────────────────────────────────────
    CTA
 ───────────────────────────────────────────────────── */
 #cta{padding:9rem 0;background:var(--bg);position:relative;overflow:hidden}
 .cta-glow{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:500px;height:350px;
-  background:radial-gradient(ellipse,rgba(212,175,55,.07) 0%,transparent 70%)
+  width:700px;height:450px;
+  background:radial-gradient(ellipse,rgba(212,175,55,.08) 0%,rgba(212,175,55,.03) 40%,transparent 70%);
+  animation:ctaGlow 6s ease-in-out infinite alternate
+}
+@keyframes ctaGlow{
+  0%{opacity:.7;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
 }
 .cta-inner{position:relative;z-index:1;text-align:center;max-width:680px;margin:0 auto}
 .cta-tag{
@@ -714,9 +776,10 @@ body::before{
   font-family:var(--general);font-size:.88rem;font-weight:600;
   padding:.9rem 2.2rem;background:var(--gold);color:var(--trust);
   border-radius:8px;box-shadow:0 4px 24px rgba(212,175,55,.25);
-  transition:all .25s var(--ease)
+  transition:all .25s var(--ease);will-change:transform
 }
-.btn-cta-primary:hover{background:#e0ba3f;transform:translateY(-2px);box-shadow:0 8px 36px rgba(212,175,55,.35)}
+.btn-cta-primary:hover{background:#e0ba3f;transform:translateY(-3px) scale(1.01);box-shadow:0 12px 44px rgba(212,175,55,.4)}
+.btn-cta-primary:active{transform:translateY(-1px) scale(.98);box-shadow:0 4px 20px rgba(212,175,55,.25)}
 .btn-cta-secondary{
   display:inline-flex;align-items:center;gap:.6rem;
   font-family:var(--general);font-size:.88rem;font-weight:600;
@@ -934,6 +997,57 @@ footer{
     <span class="s">&#9670;</span> Premium Platform
   </div>
 </div>
+
+<!-- TRUST STRIP -->
+<section class="trust-strip">
+  <div class="trust-inner">
+    <div class="trust-label">Trusted by schools across Gauteng</div>
+    <div class="trust-logos">
+      <div class="trust-logo">
+        <div class="trust-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M3 7h18M5 21V7m14 14V7M9 21V11h6v10M9 7V3h6v4"/></svg>
+        </div>
+        <span class="trust-logo-name">Midrand Primary</span>
+        <span class="trust-badge">3 years</span>
+      </div>
+      <div class="trust-logo">
+        <div class="trust-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M3 7h18M5 21V7m14 14V7M9 21V11h6v10M9 7V3h6v4"/></svg>
+        </div>
+        <span class="trust-logo-name">Centurion Academy</span>
+        <span class="trust-badge">Active</span>
+      </div>
+      <div class="trust-logo">
+        <div class="trust-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M3 7h18M5 21V7m14 14V7M9 21V11h6v10M9 7V3h6v4"/></svg>
+        </div>
+        <span class="trust-logo-name">Tshwane North Primary</span>
+        <span class="trust-badge">Active</span>
+      </div>
+      <div class="trust-logo">
+        <div class="trust-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <span class="trust-logo-name">POPIA Certified</span>
+        <span class="trust-badge">Compliant</span>
+      </div>
+      <div class="trust-logo">
+        <div class="trust-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <span class="trust-logo-name">GPS Tracking</span>
+        <span class="trust-badge">Live 24/7</span>
+      </div>
+      <div class="trust-logo">
+        <div class="trust-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <span class="trust-logo-name">Insurance Covered</span>
+        <span class="trust-badge">Verified</span>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- STATS -->
 <section id="stats">
@@ -1462,6 +1576,18 @@ footer{
 (function initGSAP() {
   if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
   gsap.registerPlugin(ScrollTrigger);
+
+  // Hero entrance — staggered spring timeline
+  const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  heroTl
+    .from('.hero-eyebrow', { opacity: 0, y: 20, duration: 0.7 })
+    .from('.hero-title', { opacity: 0, y: 40, duration: 0.9, ease: 'power4.out' }, '-=0.4')
+    .from('.role-toggle', { opacity: 0, y: 20, duration: 0.6 }, '-=0.5')
+    .from('.role-panel', { opacity: 0, y: 16, duration: 0.5 }, '-=0.3')
+    .from('.hero-actions', { opacity: 0, y: 16, duration: 0.5 }, '-=0.3')
+    .from('.hero-stats', { opacity: 0, y: 16, duration: 0.5 }, '-=0.3')
+    .from('.hero-feed-wrap', { opacity: 0, x: 40, duration: 0.8, ease: 'power3.out' }, '-=0.6')
+    .from('.hero-scroll', { opacity: 0, duration: 0.5 }, '-=0.2');
 
   // Reveal all
   gsap.utils.toArray('.reveal').forEach(el => {
