@@ -17,7 +17,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
 /* ════════════════════════════════════════════════════════
-   SCHOLARTRACK — R100K ENTERPRISE SAAS MARKETING SITE
+   SCHOLARTRACK — ENTERPRISE SAAS MARKETING SITE
    Design: VARIANCE:8 MOTION:7 DENSITY:6
 ═══════════════════════════════════════════════════════ */
 :root {
@@ -60,15 +60,63 @@ a{color:inherit;text-decoration:none}
 button{cursor:pointer;border:none;background:none;font-family:inherit}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
-/* Particle canvas */
-#hero-canvas{
-  position:absolute;inset:0;z-index:1;
-  pointer-events:none;opacity:.6
-}
+/* Grain noise */
 body::before{
   content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
   background-size:180px 180px;opacity:0.035;pointer-events:none
+}
+
+/* ─────────────────────────────────────────────────────
+   LOADER
+───────────────────────────────────────────────────── */
+#loader{
+  position:fixed;inset:0;z-index:9997;
+  background:var(--white);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.8rem;
+}
+.ld-brand{
+  font-family:var(--clash);font-size:2rem;font-weight:700;
+  letter-spacing:.04em;color:var(--text);
+}
+.ld-bar-wrap{width:200px;height:1px;background:var(--border);overflow:hidden}
+.ld-bar{height:100%;width:0;background:var(--gold);transition:width .04s linear}
+.ld-pct{font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.2em}
+
+/* ─────────────────────────────────────────────────────
+   CURSOR
+───────────────────────────────────────────────────── */
+#cur{
+  position:fixed;z-index:9999;
+  width:10px;height:10px;
+  background:var(--gold);
+  border-radius:50%;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:multiply;
+  transition:width .2s,height .2s,border-radius .2s;
+  display:none;
+}
+#cur-ring{
+  position:fixed;z-index:9998;
+  width:40px;height:40px;
+  border:1.5px solid rgba(212,175,55,.35);
+  border-radius:50%;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  display:none;
+}
+body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(212,175,55,.12)}
+@media(pointer:fine){
+  #cur,#cur-ring{display:block}
+}
+
+/* ─────────────────────────────────────────────────────
+   HERO CANVAS — Interactive dot grid
+───────────────────────────────────────────────────── */
+#hero-canvas{
+  position:absolute;inset:0;z-index:1;
+  pointer-events:none;opacity:.55;
 }
 
 /* ─────────────────────────────────────────────────────
@@ -96,12 +144,14 @@ body::before{
 }
 .nav-links a:hover{color:var(--trust)}
 .nav-cta{
-  display:inline-flex;align-items:center;gap:.4rem;
-  font-family:var(--general);font-size:.8rem;font-weight:600;
-  padding:.65rem 1.4rem;background:var(--trust);color:white;
-  border-radius:8px;transition:all .25s var(--ease)
+  font-family:var(--mono);font-size:.65rem;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;
+  padding:.65rem 1.4rem;
+  background:var(--gold);color:var(--trust);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  transition:all .25s var(--ease)
 }
-.nav-cta:hover{background:var(--trust-lt);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.nav-cta:hover{opacity:.88;transform:translateY(-1px)}
 
 /* ─────────────────────────────────────────────────────
    HERO
@@ -115,18 +165,28 @@ body::before{
 .hero-bg{
   position:absolute;inset:0;
   background:
-    radial-gradient(ellipse 80% 70% at 70% 40%,rgba(212,175,55,0.07) 0%,transparent 60%),
+    radial-gradient(ellipse 80% 70% at 70% 40%,rgba(212,175,55,0.08) 0%,transparent 60%),
     radial-gradient(ellipse 60% 50% at 30% 60%,rgba(46,125,50,0.05) 0%,transparent 50%),
-    radial-gradient(ellipse 50% 40% at 50% 100%,rgba(10,37,64,0.04) 0%,transparent 60%),
-    repeating-linear-gradient(0deg,var(--border) 1px,transparent 1px),
-    repeating-linear-gradient(90deg,var(--border) 1px,transparent 1px);
-  background-size:100% 100%,100% 100%,100% 100%,60px 60px,60px 60px;
+    radial-gradient(ellipse 50% 40% at 50% 100%,rgba(10,37,64,0.04) 0%,transparent 60%);
+  background-size:100% 100%,100% 100%,100% 100%;
   animation:bgShift 18s ease-in-out infinite alternate
 }
 @keyframes bgShift{
-  0%{background-position:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%}
-  50%{background-position:2% -1%,-1% 2%,1% 1%,0% 0%,0% 0%}
-  100%{background-position:-1% 1%,1% -1%,-1% -1%,0% 0%,0% 0%}
+  0%{background-position:0% 0%,0% 0%,0% 0%}
+  50%{background-position:2% -1%,-1% 2%,1% 1%}
+  100%{background-position:-1% 1%,1% -1%,-1% -1%}
+}
+.hero-glow{
+  position:absolute;
+  width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,175,55,0.06) 0%,transparent 65%);
+  top:-150px;right:-200px;pointer-events:none;z-index:1;
+}
+.hero-glow-b{
+  position:absolute;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(46,125,50,0.05) 0%,transparent 65%);
+  bottom:-80px;left:60px;pointer-events:none;z-index:1;
 }
 .hero-left{position:relative;z-index:2;max-width:580px}
 .hero-eyebrow{
@@ -181,22 +241,34 @@ body::before{
 /* Hero actions */
 .hero-actions{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
 .btn-primary{
-  display:inline-flex;align-items:center;gap:.6rem;
-  font-family:var(--general);font-size:.85rem;font-weight:600;
-  padding:.8rem 1.8rem;background:var(--trust);color:white;
-  border-radius:8px;box-shadow:var(--shadow-sm);
-  transition:all .25s var(--ease)
+  display:inline-flex;align-items:center;gap:.7rem;
+  font-family:var(--mono);font-size:.72rem;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:.85rem 1.8rem;
+  background:var(--gold);color:var(--trust);
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+  transition:all .25s var(--ease);will-change:transform;
+  position:relative;overflow:hidden;
 }
-.btn-primary:hover{background:var(--trust-lt);transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.btn-primary::after{
+  content:'';position:absolute;inset:0;
+  background:rgba(255,255,255,.18);
+  transform:translateX(-110%) skewX(-20deg);
+  transition:transform .4s ease;
+}
+.btn-primary:hover::after{transform:translateX(110%) skewX(-20deg)}
+.btn-primary:hover{transform:translateY(-2px)}
 .btn-primary:active{transform:translateY(0) scale(.98)}
 .btn-ghost{
   display:inline-flex;align-items:center;gap:.5rem;
-  font-family:var(--general);font-size:.8rem;font-weight:500;
-  padding:.8rem 1.5rem;border:1.5px solid var(--border);
-  color:var(--text2);border-radius:8px;
+  font-family:var(--mono);font-size:.72rem;font-weight:400;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:.85rem 1.5rem;border:1.5px solid var(--border);
+  color:var(--text2);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
   transition:all .25s var(--ease)
 }
-.btn-ghost:hover{border-color:var(--trust);color:var(--trust)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
 
 /* Hero stats */
 .hero-stats{
@@ -294,6 +366,63 @@ body::before{
 .feed-item-badge.sos{background:rgba(211,47,47,.08);color:var(--sos);border:1px solid rgba(211,47,47,.2)}
 .feed-item-badge.pay{background:var(--gold-lt);color:#9a7b1e;border:1px solid rgba(212,175,55,.2)}
 
+/* Live Dashboard — hero right panel */
+.hero-right{
+  position:relative;z-index:2;
+  display:flex;align-items:center;justify-content:flex-end;
+}
+.hero-dash{
+  display:flex;flex-direction:column;gap:.7rem;width:340px;
+}
+.dash-row{display:flex;gap:.7rem}
+.dash-row .dash-card{flex:1}
+.dash-card{
+  background:rgba(255,255,255,.9);
+  border:1.5px solid var(--border);
+  backdrop-filter:blur(20px);
+  padding:1.4rem 1.6rem;
+  position:relative;overflow:hidden;
+}
+.dash-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--gold);
+}
+.dash-card.green::before{background:var(--safe)}
+.dash-card.sos::before{background:var(--sos)}
+.dash-label{
+  font-family:var(--general);font-size:.6rem;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.5rem;
+}
+.dash-val{
+  font-family:var(--clash);font-size:2.2rem;font-weight:600;
+  color:var(--text);line-height:1;letter-spacing:-.01em;
+}
+.dash-val.amber{color:var(--amber)}
+.dash-val.green{color:var(--safe)}
+.dash-sub{font-family:var(--general);font-size:.6rem;color:var(--muted);margin-top:.2rem}
+.bus-list{display:flex;flex-direction:column;gap:0}
+.bus-item{
+  display:flex;align-items:center;gap:.7rem;
+  font-family:var(--general);font-size:.65rem;color:var(--text);
+  padding:.5rem 0;border-bottom:1px solid var(--border);
+}
+.bus-item:last-child{border-bottom:none}
+.bus-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pip-ok{background:var(--safe);box-shadow:0 0 7px var(--safe)}
+.pip-delay{background:var(--amber);box-shadow:0 0 7px var(--amber)}
+.pip-sos{background:var(--sos);box-shadow:0 0 9px var(--sos);animation:sosPulse .6s infinite}
+@keyframes sosPulse{0%,100%{opacity:1}50%{opacity:.2}}
+.bus-name{flex:1}
+.bus-eta{font-family:var(--mono);font-size:.58rem;color:var(--muted)}
+.blink{
+  display:inline-block;width:2px;height:.85em;
+  background:var(--safe);margin-left:2px;
+  animation:blink .9s step-end infinite;
+  vertical-align:text-bottom;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
 /* Scroll hint */
 .hero-scroll{
   position:absolute;bottom:2rem;left:50%;
@@ -305,6 +434,107 @@ body::before{
 }
 @keyframes floatY{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(7px)}}
 .scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--gold),transparent)}
+
+/* ─────────────────────────────────────────────────────
+   SA FLAG BAR
+───────────────────────────────────────────────────── */
+.flag-bar{
+  height:5px;
+  background:linear-gradient(90deg,
+    #007749 0%,#007749 20%,
+    #fff 20%,#fff 35%,
+    #DE3831 35%,#DE3831 50%,
+    #002395 50%,#002395 65%,
+    #F5A623 65%,#F5A623 80%,
+    #007749 80%,#007749 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────
+   PROBLEM SECTION
+───────────────────────────────────────────────────── */
+#problem{padding:9rem 0;background:var(--white);position:relative;overflow:hidden}
+#problem::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(212,175,55,.03) 0%,transparent 70%)
+}
+.problem-layout{
+  display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;
+}
+.prob-cards{display:flex;flex-direction:column;gap:.8rem}
+.prob-card{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-left:3px solid var(--sos);
+  padding:1.8rem 2rem;
+  transition:transform .3s var(--ease),box-shadow .3s;
+}
+.prob-card:hover{transform:translateX(6px);box-shadow:var(--shadow-md)}
+.prob-card.amber-card{border-left-color:var(--amber)}
+.prob-title{
+  font-family:var(--clash);font-size:1rem;font-weight:600;
+  color:var(--text);margin-bottom:.5rem;
+}
+.prob-desc{font-family:var(--general);font-size:.85rem;color:var(--text2);line-height:1.7}
+.problem-stats{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);
+  border:1px solid var(--border);margin-top:2.5rem;
+}
+.ps-cell{background:var(--white);padding:2rem 1.8rem}
+.ps-num{
+  font-family:var(--clash);font-size:3rem;font-weight:600;
+  color:var(--sos);letter-spacing:-.02em;line-height:1;margin-bottom:.4rem;
+}
+.ps-num.amber{color:var(--amber)}
+.ps-label{
+  font-family:var(--general);font-size:.62rem;color:var(--muted);line-height:1.5;
+  letter-spacing:.04em;
+}
+
+/* ─────────────────────────────────────────────────────
+   FEATURES GRID
+───────────────────────────────────────────────────── */
+.features-grid{
+  display:grid;grid-template-columns:repeat(12,1fr);
+  gap:1px;background:var(--border);
+  border:1px solid var(--border);margin-top:3rem;
+}
+.feat{
+  background:var(--white);
+  padding:2.2rem;
+  position:relative;overflow:hidden;
+  grid-column:span 4;
+  transition:background .3s;
+}
+.feat:hover{background:var(--surface)}
+.feat.wide{grid-column:span 6}
+.feat.narrow{grid-column:span 3}
+.feat-line{
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--gold);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .5s var(--ease);
+}
+.feat:hover .feat-line{transform:scaleX(1)}
+.feat-num{
+  font-family:var(--mono);font-size:.55rem;color:var(--muted);
+  letter-spacing:.12em;margin-bottom:1.5rem;
+}
+.feat-icon{
+  width:40px;height:40px;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1rem;
+  font-size:1.1rem;
+  transition:border-color .3s;
+}
+.feat:hover .feat-icon{border-color:var(--gold)}
+.feat-name{
+  font-family:var(--clash);font-size:1rem;font-weight:600;
+  color:var(--text);margin-bottom:.5rem;line-height:1.2;
+}
+.feat-desc{font-family:var(--general);font-size:.8rem;color:var(--text2);line-height:1.65}
 
 /* ─────────────────────────────────────────────────────
    TICKER
@@ -1032,6 +1262,7 @@ footer{
 .reveal{opacity:0;transform:translateY(28px)}
 .reveal.l{opacity:0;transform:translateX(-35px)}
 .reveal.r{opacity:0;transform:translateX(35px)}
+.reveal.scale{opacity:0;transform:scale(.94)}
 
 /* ─────────────────────────────────────────────────────
    MOBILE
@@ -1039,14 +1270,17 @@ footer{
 @media(max-width:900px){
   #hero{grid-template-columns:1fr;padding-top:6rem}
   .hero-left{max-width:100%;padding:0 6vw}
-  .hero-right{margin-top:3rem;padding:0 6vw}
-  .hero-right .hero-feed-wrap{border-radius:16px}
+  .hero-right{display:none}
   .hero-title{font-size:clamp(2.5rem,8vw,4rem)}
   .nav-links{display:none}
   .stats-grid{grid-template-columns:1fr 1fr}
   .stat-card.featured{grid-column:1/-1}
   .stat-card{border-right:none;border-bottom:1px solid var(--border)}
   .section-header{grid-template-columns:1fr}
+  .problem-layout{grid-template-columns:1fr;gap:3rem}
+  .problem-stats{grid-template-columns:1fr 1fr}
+  .features-grid{grid-template-columns:1fr;background:none;border:none;gap:1px}
+  .feat,.feat.wide,.feat.narrow{grid-column:span 1;border:1px solid var(--border)}
   .how-grid{grid-template-columns:1fr}
   .how-step{border-right:none;border-bottom:1px solid var(--border)}
   .how-step:last-child{border-bottom:none}
@@ -1056,6 +1290,8 @@ footer{
   .sos-layout{grid-template-columns:1fr}
   .sos-phone-wrap{margin-bottom:2rem}
   .testi-grid{grid-template-columns:1fr}
+  .sa-inner{grid-template-columns:1fr;gap:3rem}
+  .pricing-grid{grid-template-columns:1fr}
   .footer-top{grid-template-columns:1fr 1fr}
   .cta-trust{flex-wrap:wrap;gap:1.5rem}
   .role-toggle{flex-direction:column;width:100%}
@@ -1065,6 +1301,20 @@ footer{
 </style>
 </head>
 <body>
+
+<!-- SA FLAG BAR -->
+<div class="flag-bar"></div>
+
+<!-- CURSOR -->
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-brand">ScholarTrack</div>
+  <div class="ld-bar-wrap"><div class="ld-bar" id="lbar"></div></div>
+  <div class="ld-pct" id="lpct">0%</div>
+</div>
 
 <!-- NAV -->
 <nav id="nav">
@@ -1088,6 +1338,8 @@ footer{
 <section id="hero">
   <canvas id="hero-canvas"></canvas>
   <div class="hero-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow-b"></div>
 
   <!-- LEFT -->
   <div class="hero-left">
@@ -1165,16 +1417,45 @@ footer{
     </div>
   </div>
 
-  <!-- RIGHT — Live Activity Feed -->
+  <!-- RIGHT — Live Dashboard -->
   <div class="hero-right">
-    <div class="hero-feed-wrap">
-      <div class="feed-header">
-        <div class="feed-h-dot"></div>
-        <div class="feed-h-title">Live Platform Activity</div>
-        <div class="feed-h-live">Live</div>
+    <div class="hero-dash">
+      <div class="dash-row">
+        <div class="dash-card green">
+          <div class="dash-label">Buses Active</div>
+          <div class="dash-val green" id="bus-count">12<span class="blink"></span></div>
+          <div class="dash-sub">All routes live</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-label">Students Safe</div>
+          <div class="dash-val amber">247</div>
+          <div class="dash-sub">This morning</div>
+        </div>
       </div>
-      <div class="feed-body" id="activity-feed">
-        <!-- Items injected by JS -->
+      <div class="dash-card">
+        <div class="dash-label">Live Fleet — Midrand Primary</div>
+        <div class="bus-list">
+          <div class="bus-item">
+            <div class="bus-pip pip-ok"></div>
+            <span class="bus-name">Bus A — Fourways Route</span>
+            <span class="bus-eta">ETA 3 min</span>
+          </div>
+          <div class="bus-item">
+            <div class="bus-pip pip-ok"></div>
+            <span class="bus-name">Bus B — Sandton Route</span>
+            <span class="bus-eta">ETA 9 min</span>
+          </div>
+          <div class="bus-item">
+            <div class="bus-pip pip-delay"></div>
+            <span class="bus-name">Bus C — Randburg Route</span>
+            <span class="bus-eta">+7 min delay</span>
+          </div>
+          <div class="bus-item">
+            <div class="bus-pip pip-sos"></div>
+            <span class="bus-name" style="color:var(--sos)">Bus D — SOS Active</span>
+            <span class="bus-eta" style="color:var(--sos)">Alert</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1182,6 +1463,59 @@ footer{
   <div class="hero-scroll">
     <div class="scroll-line"></div>
     Scroll
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="inner" style="padding-top:9rem;padding-bottom:9rem">
+    <div class="problem-layout">
+      <div>
+        <div class="sec-tag reveal">01 — The Problem</div>
+        <h2 class="sec-title reveal" style="transition-delay:.1s">
+          South African<br>School Transport<br><span class="d">Is Broken.</span>
+        </h2>
+        <p class="sec-body reveal" style="transition-delay:.2s">
+          Every school day, thousands of parents have no idea where their child's bus is. One call to the school becomes five. By the time you reach the driver, your child is already home — or worse, you don't know.
+        </p>
+        <div class="problem-stats reveal" style="transition-delay:.3s">
+          <div class="ps-cell">
+            <div class="ps-num">80%</div>
+            <div class="ps-label">Fewer parent calls to school after ScholarTrack deployment</div>
+          </div>
+          <div class="ps-cell">
+            <div class="ps-num amber">3 sec</div>
+            <div class="ps-label">Average SOS alert time to school admin</div>
+          </div>
+          <div class="ps-cell">
+            <div class="ps-num">247</div>
+            <div class="ps-label">Students tracked safely every school day</div>
+          </div>
+          <div class="ps-cell">
+            <div class="ps-num amber">0</div>
+            <div class="ps-label">Missing child incidents at deployed schools</div>
+          </div>
+        </div>
+      </div>
+      <div class="prob-cards">
+        <div class="prob-card reveal right">
+          <div class="prob-title">The "Where's the Bus?" Call</div>
+          <div class="prob-desc">Parents call the school. The school calls the driver. Nobody knows. This happens hundreds of times per school, every week.</div>
+        </div>
+        <div class="prob-card amber-card reveal right" style="transition-delay:.12s">
+          <div class="prob-title">No Emergency Protocol</div>
+          <div class="prob-desc">A bus breaks down or a child feels unsafe. There is no button to press, no alert to send. The driver must stop and find a phone.</div>
+        </div>
+        <div class="prob-card reveal right" style="transition-delay:.22s">
+          <div class="prob-title">Manual Attendance = Gaps</div>
+          <div class="prob-desc">Paper registers get lost. Children marked present who aren't on the bus. No digital trail. No accountability. No proof.</div>
+        </div>
+        <div class="prob-card amber-card reveal right" style="transition-delay:.32s">
+          <div class="prob-title">Data Doesn't Reach Parents</div>
+          <div class="prob-desc">Even when drivers know the ETA, parents don't. SMS costs money. WhatsApp groups go unread. Parents are left guessing.</div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1331,6 +1665,81 @@ footer{
         </div>
         <div class="stat-card-n" data-target="0"><span class="suf"></span></div>
         <div class="stat-card-l">Incidents — All Time</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES GRID -->
+<section id="features" style="padding:9rem 0;background:var(--bg);position:relative;overflow:hidden">
+  <div class="inner">
+    <div class="section-header">
+      <div>
+        <div class="sec-tag reveal">02 — Features</div>
+        <h2 class="sec-title reveal" style="transition-delay:.1s">
+          Built for<br><span class="d">Every Role.</span>
+        </h2>
+      </div>
+      <p class="reveal" style="font-family:var(--general);font-size:.95rem;color:var(--text2);line-height:1.85;align-self:end;transition-delay:.15s;max-width:440px">
+        Three dedicated interfaces — parents, drivers, and school admins. Each designed for exactly what that person needs. No training required.
+      </p>
+    </div>
+    <div class="features-grid reveal scale">
+      <div class="feat wide">
+        <div class="feat-line"></div>
+        <div class="feat-num">FEAT — 001</div>
+        <div class="feat-icon">loc</div>
+        <div class="feat-name">Real-Time GPS Tracking</div>
+        <div class="feat-desc">See your child's bus on a live map updated every 10 seconds. Know when it departs, where it is now, and when it arrives. No calls. No guessing.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-line"></div>
+        <div class="feat-num">FEAT — 002</div>
+        <div class="feat-icon">sos</div>
+        <div class="feat-name">Emergency SOS</div>
+        <div class="feat-desc">One button. Instantly alerts school admin, parents, and emergency services with the bus's live GPS coordinates.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-line"></div>
+        <div class="feat-num">FEAT — 003</div>
+        <div class="feat-icon">bell</div>
+        <div class="feat-name">Push Notifications</div>
+        <div class="feat-desc">Automatic alerts when the bus departs, is 5 minutes away, and when your child is dropped off safe.</div>
+      </div>
+      <div class="feat narrow">
+        <div class="feat-line"></div>
+        <div class="feat-num">FEAT — 004</div>
+        <div class="feat-icon">check</div>
+        <div class="feat-name">Digital Attendance</div>
+        <div class="feat-desc">Drivers tap to mark students on/off. Instant, permanent records.</div>
+      </div>
+      <div class="feat narrow">
+        <div class="feat-line"></div>
+        <div class="feat-num">FEAT — 005</div>
+        <div class="feat-icon">map</div>
+        <div class="feat-name">Trip Replay</div>
+        <div class="feat-desc">Admins replay any trip. Complete audit trail, every route, every day.</div>
+      </div>
+      <div class="feat narrow">
+        <div class="feat-line"></div>
+        <div class="feat-num">FEAT — 006</div>
+        <div class="feat-icon">dash</div>
+        <div class="feat-name">Admin Dashboard</div>
+        <div class="feat-desc">All buses, all routes, all students — one real-time command centre.</div>
+      </div>
+      <div class="feat narrow">
+        <div class="feat-line"></div>
+        <div class="feat-num">FEAT — 007</div>
+        <div class="feat-icon">lock</div>
+        <div class="feat-name">POPIA Compliant</div>
+        <div class="feat-desc">All child data encrypted and stored under South African privacy law.</div>
+      </div>
+      <div class="feat wide">
+        <div class="feat-line"></div>
+        <div class="feat-num">FEAT — 008</div>
+        <div class="feat-icon">phone</div>
+        <div class="feat-name">Works on Any Phone — No Download</div>
+        <div class="feat-desc">Progressive web app. Parents open a link — no app store needed. Designed for South African data realities: lightweight, fast on 3G, works offline.</div>
       </div>
     </div>
   </div>
@@ -1725,7 +2134,340 @@ footer{
   </div>
 </section>
 
-<!-- SCHOOLS -->
+/* ─────────────────────────────────────────────────────
+   SA FEATURES SECTION
+───────────────────────────────────────────────────── */
+#sa{padding:7rem 0;background:var(--white);position:relative;overflow:hidden}
+.sa-strip{
+  position:absolute;left:0;top:0;bottom:0;width:5px;
+  display:flex;flex-direction:column;
+}
+.sa-g{flex:1;background:#007749}
+.sa-w{flex:1;background:rgba(255,255,255,.2)}
+.sa-r{flex:1;background:#DE3831}
+.sa-bl{flex:1;background:#002395}
+.sa-yl{flex:1;background:#F5A623}
+.sa-inner{
+  display:grid;grid-template-columns:1fr 2fr;gap:5rem;align-items:center;
+}
+.sa-badge{
+  width:150px;height:150px;border-radius:50%;
+  border:3px solid var(--gold);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;
+}
+.sa-badge-text{
+  font-family:var(--clash);font-size:.9rem;font-weight:700;
+  color:var(--gold);letter-spacing:.06em;text-align:center;line-height:1.2;
+}
+.sa-flag-ring{
+  position:absolute;inset:-14px;border-radius:50%;
+  border:1px solid rgba(212,175,55,.2);
+}
+.sa-features{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);
+  border:1px solid var(--border);
+}
+.sa-feat{
+  background:var(--white);padding:2rem;
+  display:flex;align-items:flex-start;gap:1rem;
+}
+.sa-feat-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;flex-shrink:0;margin-top:.15rem;
+}
+.sa-feat-title{font-family:var(--clash);font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:.3rem}
+.sa-feat-desc{font-family:var(--general);font-size:.78rem;color:var(--text2);line-height:1.6}
+
+/* ─────────────────────────────────────────────────────
+   SA PRICING SECTION
+───────────────────────────────────────────────────── */
+#pricing{padding:9rem 0;background:var(--bg);position:relative;overflow:hidden}
+.pricing-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--border);border:1px solid var(--border);margin-top:3rem;
+}
+.price-card{
+  background:var(--white);padding:3rem 2.5rem;position:relative;
+}
+.price-card.hot{background:var(--surface)}
+.hot-badge{
+  position:absolute;top:0;right:2rem;
+  background:var(--gold);color:var(--white);
+  font-family:var(--mono);font-size:.55rem;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:.28rem .7rem;transform:translateY(-50%);
+}
+.price-tier{
+  font-family:var(--mono);font-size:.58rem;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.8rem;
+}
+.price-name{
+  font-family:var(--clash);font-size:2.2rem;font-weight:700;
+  color:var(--text);margin-bottom:2rem;line-height:1;
+}
+.price-amount{
+  font-family:var(--clash);font-size:3rem;font-weight:600;
+  color:var(--gold);line-height:1;margin-bottom:.3rem;letter-spacing:-.02em;
+}
+.price-per{
+  font-family:var(--general);font-size:.65rem;color:var(--muted);
+  margin-bottom:2.5rem;
+}
+.price-feats{list-style:none;margin-bottom:2.5rem}
+.price-feats li{
+  font-family:var(--general);font-size:.84rem;color:var(--text2);
+  padding:.5rem 0;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.7rem;
+}
+.price-feats li::before{content:'\203A';color:var(--gold);font-size:1rem;flex-shrink:0}
+.price-feats li.na{color:var(--muted)}
+.price-feats li.na::before{content:'\2014';color:var(--muted)}
+.price-btn{
+  display:block;text-align:center;
+  font-family:var(--mono);font-size:.65rem;
+  letter-spacing:.14em;text-transform:uppercase;
+  padding:.85rem;border:1.5px solid var(--border);
+  color:var(--text2);transition:all .2s;
+}
+.price-card.hot .price-btn{
+  background:var(--gold);color:var(--white);border-color:var(--gold);
+  font-size:.75rem;font-weight:600;letter-spacing:.04em;
+}
+.price-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ─────────────────────────────────────────────────────
+   SA FEATURES SECTION
+───────────────────────────────────────────────────── */
+#sa{padding:7rem 0;background:var(--white);position:relative;overflow:hidden}
+.sa-strip{
+  position:absolute;left:0;top:0;bottom:0;width:5px;
+  display:flex;flex-direction:column;
+}
+.sa-g{flex:1;background:#007749}
+.sa-w{flex:1;background:rgba(255,255,255,.2)}
+.sa-r{flex:1;background:#DE3831}
+.sa-bl{flex:1;background:#002395}
+.sa-yl{flex:1;background:#F5A623}
+.sa-inner{
+  display:grid;grid-template-columns:1fr 2fr;gap:5rem;align-items:center;
+}
+.sa-badge{
+  width:150px;height:150px;border-radius:50%;
+  border:3px solid var(--gold);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;
+}
+.sa-badge-text{
+  font-family:var(--clash);font-size:.9rem;font-weight:700;
+  color:var(--gold);letter-spacing:.06em;text-align:center;line-height:1.2;
+}
+.sa-flag-ring{
+  position:absolute;inset:-14px;border-radius:50%;
+  border:1px solid rgba(212,175,55,.2);
+}
+.sa-features{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);
+  border:1px solid var(--border);
+}
+.sa-feat{
+  background:var(--white);padding:2rem;
+  display:flex;align-items:flex-start;gap:1rem;
+}
+.sa-feat-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;font-weight:700;color:var(--gold);flex-shrink:0;margin-top:.15rem;
+}
+.sa-feat-title{font-family:var(--clash);font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:.3rem}
+.sa-feat-desc{font-family:var(--general);font-size:.78rem;color:var(--text2);line-height:1.6}
+
+/* ─────────────────────────────────────────────────────
+   SA PRICING SECTION
+───────────────────────────────────────────────────── */
+#pricing{padding:9rem 0;background:var(--bg);position:relative;overflow:hidden}
+.pricing-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--border);border:1px solid var(--border);margin-top:3rem;
+}
+.price-card{
+  background:var(--white);padding:3rem 2.5rem;position:relative;
+}
+.price-card.hot{background:var(--surface)}
+.hot-badge{
+  position:absolute;top:0;right:2rem;
+  background:var(--gold);color:var(--white);
+  font-family:var(--mono);font-size:.55rem;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:.28rem .7rem;transform:translateY(-50%);
+}
+.price-tier{
+  font-family:var(--mono);font-size:.58rem;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.8rem;
+}
+.price-name{
+  font-family:var(--clash);font-size:2.2rem;font-weight:700;
+  color:var(--text);margin-bottom:2rem;line-height:1;
+}
+.price-amount{
+  font-family:var(--clash);font-size:3rem;font-weight:600;
+  color:var(--gold);line-height:1;margin-bottom:.3rem;letter-spacing:-.02em;
+}
+.price-per{
+  font-family:var(--general);font-size:.65rem;color:var(--muted);
+  margin-bottom:2.5rem;
+}
+.price-feats{list-style:none;margin-bottom:2.5rem}
+.price-feats li{
+  font-family:var(--general);font-size:.84rem;color:var(--text2);
+  padding:.5rem 0;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.7rem;
+}
+.price-feats li::before{content:'\203A';color:var(--gold);font-size:1rem;flex-shrink:0}
+.price-feats li.na{color:var(--muted)}
+.price-feats li.na::before{content:'\2014';color:var(--muted)}
+.price-btn{
+  display:block;text-align:center;
+  font-family:var(--mono);font-size:.65rem;
+  letter-spacing:.14em;text-transform:uppercase;
+  padding:.85rem;border:1.5px solid var(--border);
+  color:var(--text2);transition:all .2s;
+}
+.price-card.hot .price-btn{
+  background:var(--gold);color:var(--white);border-color:var(--gold);
+  font-size:.75rem;font-weight:600;letter-spacing:.04em;
+}
+.price-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ─────────────────────────────────────────────────────
+   SA FEATURES HTML
+───────────────────────────────────────────────────── */
+<section id="sa">
+  <div class="sa-strip">
+    <div class="sa-g"></div><div class="sa-w"></div>
+    <div class="sa-r"></div><div class="sa-bl"></div><div class="sa-yl"></div>
+  </div>
+  <div class="inner" style="padding-top:7rem;padding-bottom:7rem">
+    <div class="sa-inner">
+      <div class="reveal" style="display:flex;flex-direction:column;align-items:flex-start;gap:2rem">
+        <div class="sa-badge">
+          <div class="sa-flag-ring"></div>
+          <div class="sa-badge-text">PROUDLY<br>SOUTH<br>AFRICAN</div>
+        </div>
+        <div>
+          <div class="sec-tag" style="margin-bottom:.8rem">05 — Built for SA</div>
+          <h2 class="sec-title" style="font-size:clamp(2.5rem,4vw,4rem)">
+            Made Here.<br><span class="d">For Here.</span>
+          </h2>
+        </div>
+      </div>
+      <div class="sa-features reveal right" style="transition-delay:.15s">
+        <div class="sa-feat">
+          <div class="sa-feat-icon">3G</div>
+          <div>
+            <div class="sa-feat-title">3G & Load Shedding Proof</div>
+            <div class="sa-feat-desc">Built for South African network realities. Works offline, syncs when connection returns. Functions during Eskom outages.</div>
+          </div>
+        </div>
+        <div class="sa-feat">
+          <div class="sa-feat-icon">lock</div>
+          <div>
+            <div class="sa-feat-title">POPIA Compliant</div>
+            <div class="sa-feat-desc">All child data encrypted under South African law. Data stored on SA servers. Protection of Personal Information Act compliant.</div>
+          </div>
+        </div>
+        <div class="sa-feat">
+          <div class="sa-feat-icon">lang</div>
+          <div>
+            <div class="sa-feat-title">SA Languages</div>
+            <div class="sa-feat-desc">Notifications available in English, Zulu, Sotho, Xhosa, and Afrikaans. Designed for every South African school community.</div>
+          </div>
+        </div>
+        <div class="sa-feat">
+          <div class="sa-feat-icon">edu</div>
+          <div>
+            <div class="sa-feat-title">SASA & DoE Aligned</div>
+            <div class="sa-feat-desc">Built in consultation with SA school administrators. Aligns with Department of Education transport safety guidelines.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SA PRICING -->
+<section id="pricing">
+  <div class="inner" style="padding-top:9rem;padding-bottom:9rem">
+    <div class="sec-tag reveal">06 — Pricing</div>
+    <h2 class="sec-title reveal" style="transition-delay:.1s">
+      Simple.<br><span class="d">Fixed Price.</span>
+    </h2>
+    <p class="sec-body reveal" style="transition-delay:.2s">
+      No setup fees. No per-student charges. No surprises. All plans include onboarding and 30 days support.
+    </p>
+    <div class="pricing-grid">
+      <div class="price-card reveal" style="transition-delay:.1s">
+        <div class="price-tier">For Small Schools</div>
+        <div class="price-name">Starter</div>
+        <div class="price-amount">R20,000</div>
+        <div class="price-per">Once-off · Annual licence R8,000</div>
+        <ul class="price-feats">
+          <li>Up to 3 buses</li>
+          <li>Up to 100 students</li>
+          <li>Parent + Driver apps</li>
+          <li>Admin dashboard</li>
+          <li>Push notifications</li>
+          <li>Emergency SOS</li>
+          <li class="na">Route analytics</li>
+          <li class="na">API integration</li>
+        </ul>
+        <a href="#cta" class="price-btn">Get Started</a>
+      </div>
+      <div class="price-card hot reveal" style="transition-delay:.2s">
+        <div class="hot-badge">Most Popular</div>
+        <div class="price-tier">For Growing Schools</div>
+        <div class="price-name">Professional</div>
+        <div class="price-amount">R35,000</div>
+        <div class="price-per">Once-off · Annual licence R15,000</div>
+        <ul class="price-feats">
+          <li>Up to 10 buses</li>
+          <li>Unlimited students</li>
+          <li>Parent + Driver apps</li>
+          <li>Admin dashboard</li>
+          <li>Push + SMS notifications</li>
+          <li>Emergency SOS</li>
+          <li>Route analytics</li>
+          <li class="na">API integration</li>
+        </ul>
+        <a href="#cta" class="price-btn">Request Demo</a>
+      </div>
+      <div class="price-card reveal" style="transition-delay:.3s">
+        <div class="price-tier">For Districts</div>
+        <div class="price-name">Enterprise</div>
+        <div class="price-amount">Custom</div>
+        <div class="price-per">Multi-school · Custom licence</div>
+        <ul class="price-feats">
+          <li>Unlimited buses</li>
+          <li>Unlimited students</li>
+          <li>Parent + Driver apps</li>
+          <li>Admin dashboard</li>
+          <li>Push + SMS notifications</li>
+          <li>Emergency SOS</li>
+          <li>Route analytics</li>
+          <li>API integration</li>
+        </ul>
+        <a href="#cta" class="price-btn">Contact Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+/* SCHOOLS */
 <section id="schools">
   <div class="inner">
     <div class="sec-tag reveal">03 — Partner Schools</div>
@@ -2032,6 +2774,53 @@ footer{
 })();
 
 /* ─────────────────────────────────────────────────────
+   LOADER ANIMATION
+───────────────────────────────────────────────────── */
+(function initLoader() {
+  const lbar = document.getElementById('lbar');
+  const lpct = document.getElementById('lpct');
+  const loader = document.getElementById('loader');
+  if (!lbar || !loader) return;
+  let pct = 0;
+  const iv = setInterval(() => {
+    pct = Math.min(pct + Math.random() * 22, 100);
+    lbar.style.width = pct + '%';
+    if (lpct) lpct.textContent = Math.floor(pct) + '%';
+    if (pct >= 100) {
+      clearInterval(iv);
+      setTimeout(() => {
+        loader.style.transition = 'opacity .55s ease';
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 560);
+      }, 180);
+    }
+  }, 75);
+})();
+
+/* ─────────────────────────────────────────────────────
+   CURSOR
+───────────────────────────────────────────────────── */
+(function initCursor() {
+  const cur = document.getElementById('cur');
+  const ring = document.getElementById('cur-ring');
+  if (!cur || !ring) return;
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cur.style.left = mx + 'px'; cur.style.top = my + 'px';
+  });
+  (function ar() {
+    rx += (mx - rx) * 0.1; ry += (my - ry) * 0.1;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(ar);
+  })();
+  document.querySelectorAll('a,button,.feat,.testi-card,.price-card,.prob-card,.school-card,.driver-profile-card').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('on-link'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('on-link'));
+  });
+})();
+
+/* ─────────────────────────────────────────────────────
    GSAP SCROLL ANIMATIONS
 ───────────────────────────────────────────────────── */
 (function initGSAP() {
@@ -2086,6 +2875,23 @@ footer{
   }, { threshold: 0.5 });
 
   statEls.forEach(el => observer.observe(el));
+
+  // Bus count flicker
+  setInterval(() => {
+    const el = document.getElementById('bus-count');
+    if (el) {
+      const n = Math.floor(Math.random() * 3) + 11;
+      el.innerHTML = n + '<span class="blink"></span>';
+    }
+  }, 4500);
+
+  // Sticky CTA on scroll
+  var sticky = document.getElementById('sticky-cta');
+  if (sticky) {
+    window.addEventListener('scroll', function() {
+      sticky.classList.toggle('visible', window.scrollY > window.innerHeight * 0.6);
+    });
+  }
 
   // Nav scroll state
   window.addEventListener('scroll', () => {
@@ -2300,66 +3106,82 @@ document.head.appendChild(gpsStyle);
   </a>
 </div>
 
-<!-- Particle Canvas — Hero ambient dots -->
+<!-- Particle Canvas — Interactive dot grid -->
 <script>
 (function initParticles() {
-  var canvas = document.getElementById('hero-canvas');
-  if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-  var particles = [];
-  var W, H;
+  const cv = document.getElementById('hero-canvas');
+  const ctx = cv.getContext('2d');
+  let W, H, pts = [];
+  const COLS = 22, ROWS = 14;
+  let mouseX = 0, mouseY = 0;
 
   function resize() {
-    var hero = document.getElementById('hero');
+    const hero = document.getElementById('hero');
     if (!hero) return;
-    W = canvas.width = hero.offsetWidth;
-    H = canvas.height = hero.offsetHeight;
+    W = cv.width = hero.offsetWidth;
+    H = cv.height = hero.offsetHeight;
+    build();
   }
 
-  function spawn() {
-    particles.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.5 + 0.3,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: -Math.random() * 0.4 - 0.1,
-      a: Math.random() * 0.5 + 0.1,
-      col: Math.random() > 0.7 ? 'rgba(212,175,55,' : 'rgba(10,37,64,'
-    });
+  function build() {
+    pts = [];
+    const gx = W / COLS, gy = H / ROWS;
+    for (let r = 0; r <= ROWS; r++)
+      for (let c = 0; c <= COLS; c++)
+        pts.push({
+          bx: c * gx, by: r * gy,
+          x: c * gx, y: r * gy,
+          sz: Math.random() * 1.4 + 0.4,
+          ph: Math.random() * Math.PI * 2
+        });
   }
 
+  document.addEventListener('mousemove', e => {
+    const rc = cv.getBoundingClientRect();
+    mouseX = e.clientX - rc.left;
+    mouseY = e.clientY - rc.top;
+  });
+
+  let t = 0;
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    for (var i = 0; i < particles.length; i++) {
-      var p = particles[i];
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = p.col + p.a + ')';
-      ctx.fill();
-      p.x += p.vx;
-      p.y += p.vy;
-      p.a -= 0.001;
-      if (p.a <= 0 || p.y < -10) {
-        particles.splice(i, 1);
-        i--;
-      }
+    t += 0.005;
+    for (const p of pts) {
+      p.x = p.bx + Math.sin(t + p.ph) * 9;
+      p.y = p.by + Math.cos(t * 0.7 + p.ph) * 7;
+      const dx = p.x - mouseX, dy = p.y - mouseY;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 130) { const f = (130 - d) / 130; p.x += dx * f * 0.14; p.y += dy * f * 0.14; }
     }
-    if (particles.length < 60) spawn();
+    // Lines
+    for (let i = 0; i < pts.length; i++)
+      for (let j = i + 1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 88) {
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(212,175,55,' + (1 - d / 88) * 0.22 + ')';
+          ctx.lineWidth = 0.6;
+          ctx.moveTo(pts[i].x, pts[i].y);
+          ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.stroke();
+        }
+      }
+    // Dots
+    for (const p of pts) {
+      const dx = p.x - mouseX, dy = p.y - mouseY;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      const bright = d < 160 ? 0.85 : 0.28;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.sz, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(212,175,55,' + bright + ')';
+      ctx.fill();
+    }
     requestAnimationFrame(draw);
   }
-
-  resize();
   window.addEventListener('resize', resize);
-  for (var j = 0; j < 40; j++) spawn();
+  resize();
   draw();
-
-  // Sticky CTA on scroll
-  var sticky = document.getElementById('sticky-cta');
-  if (sticky) {
-    window.addEventListener('scroll', function() {
-      sticky.classList.toggle('visible', window.scrollY > window.innerHeight * 0.6);
-    });
-  }
 })();
 </script>
 </body>
