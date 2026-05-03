@@ -3,882 +3,861 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ScholarTrack — Every Child, Accounted For</title>
-<meta name="description" content="South Africa's school transport marketplace. Parents hire verified drivers with private vehicles. Real-time tracking, emergency SOS, and instant notifications.">
+<title>ScholarTrack — R100k School Transport Marketplace</title>
+<meta name="description" content="Two-sided marketplace connecting parents with verified private drivers. Real-time safety, emergency response, and investment-grade technology for South African school transport.">
+<meta property="og:title" content="ScholarTrack — Every Child, Accounted For">
+<meta property="og:description" content="R100k school transport marketplace. 209 students, 11 verified drivers, 3 schools.">
+<meta name="theme-color" content="#0A2540">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Epilogue:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 /* ════════════════════════════════════════════════════════
-   DESIGN TOKENS — Safety-First Palette
-   Primary: #FFC107 | Secondary: #2E7D32 | Accent: #2196F3 | SOS: #F44336
+   SCHOLARTRACK — AWWARDS-WINNING DESIGN SYSTEM
+   Design: VARIANCE:9 MOTION:8 DENSITY:7
 ═══════════════════════════════════════════════════════ */
 :root {
-  --bg:       #f4f5f7;
-  --bg2:      #eef0f4;
-  --panel:    #ffffff;
-  --border:   #e0e4ec;
-  --amber:    #FFC107;
-  --amber-dk: #e6a800;
+  --trust:    #0A2540;
+  --trust-lt: #0d2f55;
+  --safe:     #2E7D32;
+  --safe-lt: #E8F5E9;
+  --amber:    #F5A623;
   --amber-lt: #FFF8E1;
-  --green:    #2E7D32;
-  --green-lt: #E8F5E9;
-  --blue:     #2196F3;
-  --blue-lt:  #E3F2FD;
-  --red:      #F44336;
-  --red-lt:   #FFEBEE;
-  --text:     #1a1f2e;
-  --text2:    #4a5568;
-  --muted:    #8a94a6;
-  --dim:      #c4cad6;
-  --road:     #d0d8e4;
+  --sos:      #D32F2F;
+  --gold:     #D4AF37;
+  --gold-lt:  #FFF9E6;
+  --bg:       #060d18;
+  --panel:    #0d1f35;
+  --surface:  #122540;
+  --border:   rgba(255,255,255,0.07);
+  --border-hi: rgba(212,175,55,0.25);
+  --text:     #f0f4f8;
+  --text2:    #8ba3c7;
+  --muted:    #4a6185;
+  --road:     rgba(255,255,255,0.04);
   --syne:     'Syne', sans-serif;
-  --epilogue: 'Epilogue', sans-serif;
+  --outfit:   'Outfit', sans-serif;
   --mono:     'DM Mono', monospace;
+  --ease:     cubic-bezier(0.16, 1, 0.3, 1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--outfit);font-size:16px;line-height:1.6;
+  overflow-x:hidden;
+}
+::selection{background:var(--gold);color:var(--trust)}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font-family:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* Grain noise overlay */
+body::before{
+  content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size:200px 200px;opacity:0.04
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--epilogue);
-  font-size: 16px;
-  line-height: 1.6;
-  overflow-x: hidden;
-}
-a { color: inherit; text-decoration: none; }
-button { cursor: pointer; border: none; background: none; }
-::selection { background: var(--amber); color: var(--text); }
-
-/* road network background pattern */
-.road-bg {
+/* Road grid background */
+.road-grid{
   background-image:
-    linear-gradient(var(--road) 2px, transparent 2px),
-    linear-gradient(90deg, var(--road) 2px, transparent 2px),
-    linear-gradient(rgba(200,208,220,.5) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(200,208,220,.5) 1px, transparent 1px);
-  background-size: 100px 100px, 100px 100px, 33px 33px, 33px 33px;
+    linear-gradient(var(--road) 1px,transparent 1px),
+    linear-gradient(90deg,var(--road) 1px,transparent 1px);
+  background-size:60px 60px
 }
 
-/* ════════════════════════════════════════════════════════
-   LOADER
-═══════════════════════════════════════════════════════ */
-#loader {
-  position: fixed; inset: 0; z-index: 9999;
-  background: var(--text);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 1.5rem;
-  transition: opacity .6s ease;
+/* ─────────────────────────────────────────────────────
+   NAVBAR
+───────────────────────────────────────────────────── */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:1.2rem 3rem;display:flex;align-items:center;
+  justify-content:space-between;
+  background:rgba(6,13,24,0.7);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  transition:background .4s var(--ease),border-color .4s
 }
-.loader-logo {
-  font-family: var(--syne);
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: .28em;
-  text-transform: uppercase;
-  color: var(--amber);
+#nav.scrolled{background:rgba(6,13,24,0.92);border-color:var(--border-hi)}
+.nav-logo{
+  display:flex;align-items:center;gap:.7rem;
+  font-family:var(--syne);font-size:1rem;font-weight:700;
+  letter-spacing:.05em;color:var(--text)
 }
-.loader-bus-svg { width: 64px; height: 40px; }
-.loader-bar-wrap {
-  width: 200px; height: 3px;
-  background: rgba(255,255,255,.1);
-  border-radius: 2px;
-  position: relative; overflow: hidden;
+.nav-logo svg{width:32px;height:32px}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--text2);
+  transition:color .25s
 }
-.loader-bar {
-  position: absolute; top: 0; left: 0; height: 100%;
-  width: 0; background: var(--amber); border-radius: 2px;
-  transition: width .04s linear;
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;
+  text-transform:uppercase;padding:.6rem 1.4rem;
+  border:1px solid var(--gold);color:var(--gold);
+  border-radius:6px;transition:all .25s var(--ease)
 }
-.loader-pct {
-  font-family: var(--mono); font-size: .62rem;
-  color: var(--muted); letter-spacing: .15em;
+.nav-cta:hover{background:var(--gold);color:var(--trust)}
+
+/* ─────────────────────────────────────────────────────
+   HERO — 3D SCENE + SPLIT LAYOUT
+───────────────────────────────────────────────────── */
+#hero{
+  min-height:100dvh;position:relative;display:grid;
+  grid-template-columns:1fr 1fr;align-items:center;
+  overflow:hidden;padding:0
+}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 65% 50%,rgba(13,47,85,0.6) 0%,transparent 70%)}
+#three-canvas{
+  position:absolute;top:0;right:0;width:100%;height:100%;
+  z-index:1;cursor:grab
+}
+#three-canvas:active{cursor:grabbing}
+.hero-content{
+  position:relative;z-index:3;padding:8rem 5rem 8rem 7vw;
+  max-width:800px
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);
+  border:1px solid rgba(212,175,55,.2);padding:.3rem .8rem;
+  border-radius:20px;margin-bottom:2rem;
+  background:rgba(212,175,55,.05)
+}
+.hero-eyebrow::before{
+  content:'';width:5px;height:5px;background:var(--gold);
+  border-radius:50%;box-shadow:0 0 6px var(--gold);animation:ping 2s infinite
+}
+@keyframes ping{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.6)}}
+.hero-h1{
+  font-family:var(--syne);font-size:clamp(3.5rem,6.5vw,7.5rem);
+  font-weight:800;line-height:.88;letter-spacing:-.03em;
+  color:var(--text);margin-bottom:1.8rem
+}
+.hero-h1 .gradient-text{
+  background:linear-gradient(135deg,var(--gold) 0%,var(--amber) 50%,var(--safe) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text
+}
+.hero-h1 .blue{color:var(--text2)}
+.hero-sub{
+  font-size:1rem;font-weight:300;color:var(--text2);
+  max-width:460px;line-height:1.85;margin-bottom:2.5rem;
+  font-family:var(--outfit)
+}
+.hero-sub strong{color:var(--text);font-weight:500}
+
+/* Parent/Driver Toggle */
+.role-toggle{
+  display:inline-flex;background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;padding:.25rem;gap:.15rem;margin-bottom:2.5rem
+}
+.role-btn{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;
+  text-transform:uppercase;padding:.55rem 1.2rem;border-radius:7px;
+  color:var(--text2);transition:all .3s var(--ease);
+  display:flex;align-items:center;gap:.4rem
+}
+.role-btn.active{background:var(--gold);color:var(--trust);font-weight:500}
+.role-btn:not(.active):hover{color:var(--text);background:rgba(255,255,255,.04)}
+
+/* Hero CTAs */
+.hero-actions{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.6rem;
+  font-family:var(--syne);font-size:.82rem;font-weight:600;
+  letter-spacing:.03em;padding:.9rem 2rem;
+  background:var(--gold);color:var(--trust);
+  border-radius:8px;
+  box-shadow:0 4px 24px rgba(212,175,55,.25);
+  transition:all .25s var(--ease)
+}
+.btn-primary:hover{background:#e8c040;transform:translateY(-2px);box-shadow:0 8px 32px rgba(212,175,55,.35)}
+.btn-primary:active{transform:translateY(0) scale(.98)}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:.6rem;
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;padding:.9rem 1.6rem;
+  border:1px solid var(--border);color:var(--text2);
+  border-radius:8px;transition:all .25s var(--ease)
+}
+.btn-ghost:hover{border-color:var(--text2);color:var(--text);transform:translateY(-1px)}
+
+/* Hero stats row */
+.hero-stats{
+  display:flex;gap:2rem;margin-top:3rem;flex-wrap:wrap;
+  padding-top:2rem;border-top:1px solid var(--border)
+}
+.hero-stat{display:flex;flex-direction:column;gap:.15rem}
+.hero-stat-n{
+  font-family:var(--syne);font-size:2rem;font-weight:800;
+  line-height:1;color:var(--text)
+}
+.hero-stat-n span{color:var(--gold)}
+.hero-stat-l{
+  font-family:var(--mono);font-size:.55rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--muted)
 }
 
-/* ════════════════════════════════════════════════════════
-   NAV
-═══════════════════════════════════════════════════════ */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 3rem; height: 66px;
-  transition: background .35s, box-shadow .35s, border-color .35s;
-  border-bottom: 1px solid transparent;
+/* Scroll hint */
+.hero-scroll{
+  position:absolute;bottom:2.5rem;left:50%;
+  transform:translateX(-50%);z-index:3;
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  font-family:var(--mono);font-size:.52rem;
+  color:var(--muted);letter-spacing:.2em;text-transform:uppercase;
+  animation:floatY 2.4s ease-in-out infinite
 }
-nav.scrolled {
-  background: rgba(255,255,255,.93);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 1px 20px rgba(0,0,0,.06);
-  border-color: var(--border);
-}
-.nav-logo {
-  display: flex; align-items: center; gap: .7rem;
-  font-family: var(--syne); font-size: .92rem;
-  font-weight: 700; letter-spacing: .06em;
-  color: var(--text);
-}
-.nav-bus-icon {
-  width: 34px; height: 20px; background: var(--amber);
-  border-radius: 4px 4px 2px 2px; position: relative;
-}
-.nav-bus-icon::before {
-  content: ''; position: absolute; top: -6px; left: 7px; right: 7px; height: 6px;
-  background: var(--amber); border-radius: 3px 3px 0 0;
-}
-.nav-bus-icon::after {
-  content: ''; position: absolute; bottom: -4px; left: 3px; right: 3px; height: 4px;
-  background: rgba(0,0,0,.18); border-radius: 0 0 2px 2px;
-}
-.bw { width: 7px; height: 7px; background: #333; border-radius: 50%; position: absolute; bottom: -3px; }
-.bw-l { left: 3px; } .bw-r { right: 3px; }
-.nav-pip {
-  width: 8px; height: 8px; background: var(--green); border-radius: 50%;
-  box-shadow: 0 0 6px var(--green); position: relative;
-}
-.nav-pip::after {
-  content: ''; position: absolute; inset: -3px;
-  border: 1.5px solid rgba(46,125,50,.35); border-radius: 50%;
-  animation: ping 2s infinite;
-}
-@keyframes ping {
-  0%   { transform: scale(1); opacity: 1; }
-  100% { transform: scale(2.4); opacity: 0; }
-}
-.nav-links { display: flex; gap: 2rem; list-style: none; font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
-.nav-links a { color: var(--muted); transition: color .2s; }
-.nav-links a:hover { color: var(--amber-dk); }
-.nav-cta {
-  font-family: var(--mono); font-size: .68rem; letter-spacing: .12em;
-  text-transform: uppercase; padding: .5rem 1.2rem;
-  background: var(--amber); color: var(--text); font-weight: 500;
-  border-radius: 6px; transition: background .2s, transform .15s;
-  display: flex; align-items: center; gap: .5rem;
-}
-.nav-cta:hover { background: var(--amber-dk); transform: translateY(-1px); }
+@keyframes floatY{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+.hero-scroll-line{width:1px;height:45px;background:linear-gradient(to bottom,var(--gold),transparent)}
 
-/* ════════════════════════════════════════════════════════
-   HERO
-═══════════════════════════════════════════════════════ */
-#hero {
-  position: relative; min-height: 100vh;
-  display: flex; align-items: center;
-  padding: 110px 3rem 5rem;
-  overflow: hidden;
-}
-.hero-road-bg {
-  position: absolute; inset: 0; z-index: 0;
-  opacity: .4;
-  background-image:
-    linear-gradient(var(--road) 2px, transparent 2px),
-    linear-gradient(90deg, var(--road) 2px, transparent 2px),
-    linear-gradient(rgba(200,208,220,.5) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(200,208,220,.5) 1px, transparent 1px);
-  background-size: 80px 80px, 80px 80px, 26px 26px, 26px 26px;
-}
-.hero-glow-amber {
-  position: absolute; top: -20%; right: -5%;
-  width: 65%; height: 90%;
-  background: radial-gradient(ellipse, rgba(255,193,7,.09) 0%, transparent 65%);
-  pointer-events: none; z-index: 1;
-}
-.hero-glow-green {
-  position: absolute; bottom: -10%; left: -5%;
-  width: 50%; height: 60%;
-  background: radial-gradient(ellipse, rgba(46,125,50,.07) 0%, transparent 65%);
-  pointer-events: none; z-index: 1;
-}
-.hero-3d-bus {
-  position: absolute; right: 5%; top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  animation: busFloat 3s ease-in-out infinite;
-}
-@keyframes busFloat {
-  0%,100% { transform: translateY(-50%) translateY(0px); }
-  50% { transform: translateY(-50%) translateY(-8px); }
-}
-.hero-content { position: relative; z-index: 3; max-width: 700px; }
-.hero-badge {
-  display: inline-flex; align-items: center; gap: .5rem;
-  font-family: var(--mono); font-size: .6rem;
-  letter-spacing: .15em; text-transform: uppercase;
-  color: var(--green); background: var(--green-lt);
-  border: 1px solid rgba(46,125,50,.18);
-  padding: .3rem .75rem; margin-bottom: 1.8rem;
-  border-radius: 20px;
-}
-.hero-badge-dot {
-  width: 6px; height: 6px; background: var(--green);
-  border-radius: 50%; animation: ping 2s infinite;
-  box-shadow: 0 0 4px var(--green);
-}
-.hero-h1 {
-  font-family: var(--syne);
-  font-size: clamp(3.2rem, 7.5vw, 7rem);
-  font-weight: 800; line-height: .9;
-  color: var(--text); letter-spacing: -.025em;
-  margin-bottom: 1.6rem;
-}
-.hero-h1 .y { color: var(--amber-dk); }
-.hero-h1 .b { color: var(--blue); display: block; }
-.hero-sub {
-  font-size: .98rem; font-weight: 300; color: var(--text2);
-  max-width: 440px; line-height: 1.85; margin-bottom: 2.2rem;
-}
-.hero-sub strong { color: var(--text); font-weight: 500; }
-.hero-actions { display: flex; gap: .85rem; flex-wrap: wrap; align-items: center; }
-.btn-primary {
-  display: inline-flex; align-items: center; gap: .6rem;
-  font-family: var(--syne); font-size: .82rem; font-weight: 600;
-  letter-spacing: .03em; padding: .85rem 1.8rem;
-  background: var(--amber); color: var(--text);
-  border-radius: 8px;
-  box-shadow: 0 4px 18px rgba(255,193,7,.28);
-  transition: background .2s, transform .15s, box-shadow .2s;
-}
-.btn-primary:hover { background: var(--amber-dk); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,193,7,.38); }
-.btn-secondary {
-  display: inline-flex; align-items: center; gap: .6rem;
-  font-family: var(--mono); font-size: .7rem;
-  letter-spacing: .1em; text-transform: uppercase;
-  padding: .85rem 1.6rem; border: 1.5px solid var(--blue);
-  color: var(--blue); border-radius: 8px;
-  transition: background .2s, color .2s, transform .15s;
-}
-.btn-secondary:hover { background: var(--blue); color: white; transform: translateY(-1px); }
-
-/* Hero live counters */
-.hero-counters {
-  display: flex; gap: 2rem; margin-top: 3rem; flex-wrap: wrap;
-}
-.hero-counter { display: flex; flex-direction: column; gap: .2rem; }
-.counter-n {
-  font-family: var(--syne); font-size: 2.2rem;
-  font-weight: 800; color: var(--text); line-height: 1;
-  display: flex; align-items: baseline; gap: .1rem;
-}
-.counter-n span { color: var(--amber-dk); transition: all .3s; }
-.counter-l {
-  font-family: var(--mono); font-size: .58rem;
-  letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
-}
-.counter-sep { width: 1px; height: 40px; background: var(--border); align-self: center; }
-
-/* scroll hint */
-.hero-scroll {
-  position: absolute; bottom: 2rem; left: 50%;
-  transform: translateX(-50%); z-index: 3;
-  display: flex; flex-direction: column; align-items: center; gap: .4rem;
-  font-family: var(--mono); font-size: .55rem;
-  color: var(--dim); letter-spacing: .18em; text-transform: uppercase;
-  animation: floatY 2.4s ease-in-out infinite;
-}
-@keyframes floatY { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(7px)} }
-.scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--amber), transparent); }
-
-/* ════════════════════════════════════════════════════════
+/* ─────────────────────────────────────────────────────
    TICKER
-═══════════════════════════════════════════════════════ */
-.ticker-strip {
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: .65rem 0; overflow: hidden;
-  background: var(--panel);
+───────────────────────────────────────────────────── */
+.ticker-strip{
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:.6rem 0;overflow:hidden;background:var(--panel)
 }
-.ticker-track {
-  display: flex; gap: 4rem; white-space: nowrap;
-  animation: ticker 28s linear infinite;
-  font-family: var(--mono); font-size: .62rem;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+.ticker-track{
+  display:flex;gap:4rem;white-space:nowrap;
+  animation:ticker 32s linear infinite;
+  font-family:var(--mono);font-size:.6rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted)
 }
-.ticker-track .s { color: var(--amber); }
-@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.ticker-track .s{color:var(--gold)}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
-/* ════════════════════════════════════════════════════════
-   STATS BAND
-═══════════════════════════════════════════════════════ */
-#stats {
-  padding: 4rem 0; background: var(--text);
-  position: relative; overflow: hidden;
+/* ─────────────────────────────────────────────────────
+   STATS BAND — INVESTMENT GRADE
+───────────────────────────────────────────────────── */
+#stats{
+  padding:5rem 0;background:var(--panel);
+  position:relative;overflow:hidden
 }
-#stats::before {
-  content: ''; position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-  background-size: 40px 40px;
+#stats::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(212,175,55,.03) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(212,175,55,.03) 1px,transparent 1px);
+  background-size:50px 50px
 }
-.stats-inner {
-  display: grid; grid-template-columns: repeat(5, 1fr);
-  position: relative; z-index: 1;
+#stats .inner{max-width:1300px;margin:0 auto;padding:0 5vw}
+.stats-grid{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr 2fr;gap:0;
+  position:relative;z-index:1
 }
-.stat-block {
-  padding: 1.2rem 1.8rem;
-  border-right: 1px solid rgba(255,255,255,.06);
-  text-align: center;
+.stat-card{
+  padding:2rem 2.5rem;border-right:1px solid var(--border);
+  position:relative;overflow:hidden
 }
-.stat-block:last-child { border-right: none; }
-.stat-icon {
-  width: 42px; height: 42px; background: rgba(255,193,7,.1);
-  border-radius: 10px; display: flex; align-items: center; justify-content: center;
-  margin: 0 auto .7rem;
+.stat-card:last-child{border-right:none}
+.stat-card::after{
+  content:'';position:absolute;top:0;left:0;width:100%;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+  transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)
 }
-.stat-icon svg { width: 20px; height: 20px; }
-.stat-n {
-  font-family: var(--syne); font-size: 2.8rem; font-weight: 800;
-  color: #fff; line-height: 1; letter-spacing: -.03em;
+.stat-card.revealed::after{transform:scaleX(1)}
+.stat-card-icon{
+  width:44px;height:44px;background:rgba(212,175,55,.08);
+  border:1px solid rgba(212,175,55,.15);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1rem
 }
-.stat-l {
-  font-family: var(--mono); font-size: .58rem;
-  letter-spacing: .14em; text-transform: uppercase;
-  color: rgba(255,255,255,.35); margin-top: .35rem;
+.stat-card-icon svg{width:20px;height:20px;stroke-width:1.5}
+.stat-card-n{
+  font-family:var(--syne);font-size:3.2rem;font-weight:800;
+  color:var(--text);line-height:1;letter-spacing:-.04em;
+  display:flex;align-items:baseline;gap:.1rem
 }
-
-/* ════════════════════════════════════════════════════════
-   LIVE MAP SECTION
-═══════════════════════════════════════════════════════ */
-#livemap { padding: 8rem 0; background: var(--panel); }
-.section-header {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
-  align-items: end; margin-bottom: 3rem;
+.stat-card-n .suf{font-size:1.4rem;color:var(--gold);margin-left:.1rem}
+.stat-card-l{
+  font-family:var(--mono);font-size:.58rem;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin-top:.5rem
 }
-.sec-tag {
-  display: flex; align-items: center; gap: .7rem;
-  font-family: var(--mono); font-size: .6rem;
-  letter-spacing: .2em; text-transform: uppercase;
-  color: var(--amber-dk); margin-bottom: 1rem;
+.stat-card.featured{
+  background:linear-gradient(135deg,rgba(212,175,55,.06),rgba(212,175,55,.02));
+  border:1px solid rgba(212,175,55,.12);border-radius:12px;
+  margin:-.5rem 1rem;padding:2.5rem 2rem;
+  display:flex;flex-direction:column;justify-content:center
 }
-.sec-tag::before { content: ''; width: 18px; height: 2px; background: var(--amber); border-radius: 1px; }
-.sec-title {
-  font-family: var(--syne); font-size: clamp(2.2rem, 4vw, 3.8rem);
-  font-weight: 800; color: var(--text);
-  line-height: .95; letter-spacing: -.02em;
+.stat-card.featured::after{display:none}
+.stat-featured-label{
+  font-family:var(--mono);font-size:.55rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:.5rem
 }
-.sec-title .d { color: var(--muted); }
-.sec-body { font-size: .92rem; font-weight: 300; color: var(--text2); line-height: 1.8; max-width: 500px; margin-top: .8rem; }
-
-/* Map container */
-.map-container-wrap { position: relative; }
-.live-map-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 20px; overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0,0,0,.07);
+.stat-featured-title{
+  font-family:var(--syne);font-size:1.1rem;font-weight:700;
+  color:var(--text);line-height:1.3;margin-bottom:.5rem
 }
-.map-header {
-  background: var(--text); padding: .7rem 1.2rem;
-  display: flex; align-items: center; gap: .7rem;
-}
-.map-h-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 6px var(--green); animation: ping 2s infinite; }
-.map-h-title { font-family: var(--mono); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.6); }
-.map-h-live { margin-left: auto; font-family: var(--mono); font-size: .55rem; letter-spacing: .1em; text-transform: uppercase; color: var(--green); }
-#leaflet-map { height: 380px; width: 100%; background: #e8edf4; }
-
-/* Custom Leaflet bus markers */
-.bus-marker {
-  position: relative; width: 42px; height: 26px;
-  filter: drop-shadow(0 3px 6px rgba(0,0,0,.2));
-}
-.bus-body { position: absolute; inset: 0; }
-.route-line { position: absolute; pointer-events: none; }
-
-/* GPS pulse dot */
-.gps-ring {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  width: 60px; height: 60px;
-  border-radius: 50%; border: 2px solid var(--blue);
-  animation: gpsPulse 2s ease-out infinite;
-  pointer-events: none;
-}
-.gps-ring-b {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  width: 60px; height: 60px;
-  border-radius: 50%; border: 1.5px solid var(--blue);
-  animation: gpsPulseB 2s ease-out infinite .4s;
-  pointer-events: none;
-}
-@keyframes gpsPulse {
-  0% { transform: translate(-50%,-50%) scale(.5); opacity: .9; }
-  100% { transform: translate(-50%,-50%) scale(1.8); opacity: 0; }
-}
-@keyframes gpsPulseB {
-  0% { transform: translate(-50%,-50%) scale(.5); opacity: .6; }
-  100% { transform: translate(-50%,-50%) scale(2.2); opacity: 0; }
+.stat-featured-sub{
+  font-family:var(--outfit);font-size:.82rem;color:var(--text2);line-height:1.5
 }
 
-/* Bus list cards */
-.map-bus-list {
-  padding: 1rem;
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: .7rem;
+/* ─────────────────────────────────────────────────────
+   MAP SECTION — LIVE MARKETPLACE
+───────────────────────────────────────────────────── */
+#map-section{
+  padding:10rem 0;background:var(--bg);position:relative;overflow:hidden
 }
-.map-bus-card {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 12px; padding: .8rem;
-  display: flex; align-items: center; gap: .7rem;
-  transition: border-color .2s, box-shadow .2s;
+#map-section .road-grid{position:absolute;inset:0;opacity:.5}
+.inner{max-width:1300px;margin:0 auto;padding:0 5vw}
+.section-header{
+  display:grid;grid-template-columns:1fr 1fr;gap:4rem;
+  align-items:end;margin-bottom:3.5rem
 }
-.map-bus-card:hover { border-color: var(--amber); box-shadow: 0 4px 16px rgba(255,193,7,.1); }
-.map-bc-icon { flex-shrink: 0; }
-.map-bc-icon svg { width: 36px; height: 22px; }
-.map-bc-info { flex: 1; min-width: 0; }
-.map-bc-route { font-family: var(--syne); font-size: .75rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.map-bc-meta { font-family: var(--mono); font-size: .55rem; color: var(--muted); margin-top: .1rem; }
-.map-bc-eta { font-family: var(--syne); font-size: .9rem; font-weight: 700; color: var(--green); text-align: right; flex-shrink: 0; }
-.map-bc-eta span { display: block; font-family: var(--mono); font-size: .52rem; font-weight: 400; color: var(--muted); }
-.map-bc-eta.dly { color: var(--amber-dk); }
-.map-bc-eta.sos { color: var(--red); }
+.sec-tag{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:1rem;
+  display:flex;align-items:center;gap:.5rem
+}
+.sec-tag::before{content:'//';color:var(--muted)}
+.sec-title{
+  font-family:var(--syne);font-size:clamp(2.2rem,4vw,3.8rem);
+  font-weight:800;line-height:1.05;letter-spacing:-.025em;
+  color:var(--text);margin-bottom:.8rem
+}
+.sec-title .d{color:var(--gold)}
+.sec-body{font-size:.95rem;color:var(--text2);max-width:500px;line-height:1.75}
+.map-wrapper{
+  border:1px solid var(--border);border-radius:20px;overflow:hidden;
+  background:var(--panel);box-shadow:0 32px 80px rgba(0,0,0,.4)
+}
+.map-header{
+  padding:1rem 1.5rem;display:flex;align-items:center;gap:.8rem;
+  border-bottom:1px solid var(--border);background:var(--surface)
+}
+.map-h-dot{
+  width:8px;height:8px;background:var(--safe);border-radius:50%;
+  box-shadow:0 0 8px var(--safe);animation:ping 2s infinite
+}
+.map-h-title{
+  font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text2);flex:1
+}
+.map-h-live{
+  font-family:var(--mono);font-size:.55rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--safe);background:rgba(46,125,50,.1);
+  border:1px solid rgba(46,125,50,.2);padding:.2rem .6rem;
+  border-radius:20px
+}
+#leaflet-map{height:480px;filter:saturate(0.65) brightness(1.08)}
+.map-driver-list{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--border)
+}
+.map-driver-card{
+  background:var(--panel);padding:1.2rem 1.4rem;
+  display:flex;flex-direction:column;gap:.5rem;
+  transition:background .25s;cursor:pointer
+}
+.map-driver-card:hover{background:var(--surface)}
+.map-driver-card .map-dc-top{display:flex;align-items:center;gap:.6rem}
+.map-driver-card .map-dc-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--amber),var(--safe));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--syne);font-size:.7rem;font-weight:700;
+  color:var(--trust);flex-shrink:0
+}
+.map-driver-card .map-dc-info{flex:1}
+.map-driver-card .map-dc-name{
+  font-family:var(--syne);font-size:.82rem;font-weight:700;color:var(--text)
+}
+.map-driver-card .map-dc-route{
+  font-family:var(--mono);font-size:.55rem;color:var(--muted)
+}
+.map-driver-card .map-dc-status{
+  font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;
+  text-transform:uppercase;padding:.15rem .5rem;border-radius:20px;width:fit-content
+}
+.map-driver-card .map-dc-status.ok{background:rgba(46,125,50,.1);color:var(--safe);border:1px solid rgba(46,125,50,.2)}
+.map-driver-card .map-dc-status.dly{background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
+.map-driver-card .map-dc-status.sos{background:rgba(211,47,47,.15);color:var(--sos);border:1px solid rgba(211,47,47,.25)}
+.map-driver-card .map-dc-eta{
+  font-family:var(--syne);font-size:1.1rem;font-weight:800;color:var(--text)
+}
+.map-driver-card .map-dc-eta span{
+  font-size:.6rem;font-family:var(--mono);color:var(--muted);font-weight:400
+}
+.map-legend{
+  display:flex;gap:1.5rem;padding:.8rem 1.4rem;
+  border-top:1px solid var(--border)
+}
+.legend-item{display:flex;align-items:center;gap:.4rem;font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.legend-dot{width:6px;height:6px;border-radius:50%}
+.legend-dot.grn{background:var(--safe);box-shadow:0 0 5px var(--safe)}
+.legend-dot.ylw{background:var(--amber)}
+.legend-dot.red{background:var(--sos)}
+.legend-dot.blu{background:#2196F3}
 
-/* Map legend */
-.map-legend {
-  padding: .7rem 1rem;
-  border-top: 1px solid var(--border);
-  display: flex; gap: 1.5rem; align-items: center;
-  font-family: var(--mono); font-size: .58rem; color: var(--muted); letter-spacing: .06em;
+/* ─────────────────────────────────────────────────────
+   SOS DEMO — PREMIUM INTERACTIVE
+───────────────────────────────────────────────────── */
+#sos-demo{
+  padding:10rem 0;background:var(--panel);
+  position:relative;overflow:hidden
 }
-.legend-item { display: flex; align-items: center; gap: .4rem; }
-.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-.legend-dot.grn { background: var(--green); box-shadow: 0 0 4px var(--green); }
-.legend-dot.ylw { background: var(--amber); box-shadow: 0 0 4px var(--amber); }
-.legend-dot.red { background: var(--red); box-shadow: 0 0 4px var(--red); }
-.legend-dot.blu { background: var(--blue); box-shadow: 0 0 4px var(--blue); }
+#sos-demo::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 30% 50%,rgba(211,47,47,.04) 0%,transparent 70%)
+}
+.sos-layout{
+  display:grid;grid-template-columns:1fr 1fr;gap:6rem;
+  align-items:center;margin-top:3rem
+}
+.sos-phone-wrap{
+  position:relative;display:flex;align-items:center;justify-content:center
+}
+/* Radar rings emanating from phone */
+.sos-radar{
+  position:absolute;width:320px;height:320px;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none
+}
+.sos-radar-ring{
+  position:absolute;width:100%;height:100%;border-radius:50%;
+  border:1px solid rgba(211,47,47,.3);
+  animation:sosRadar 2.5s ease-out infinite
+}
+.sos-radar-ring:nth-child(2){animation-delay:.6s}
+.sos-radar-ring:nth-child(3){animation-delay:1.2s}
+@keyframes sosRadar{0%{transform:scale(.4);opacity:.8}100%{transform:scale(1.8);opacity:0}}
+.sos-phone{
+  background:#080e1a;border-radius:28px;padding:10px;
+  box-shadow:0 24px 80px rgba(0,0,0,.5),0 0 60px rgba(211,47,47,.08);
+  width:260px;position:relative;z-index:2
+}
+.sos-screen{
+  background:var(--trust);border-radius:20px;overflow:hidden;
+  min-height:460px;display:flex;flex-direction:column
+}
+.sos-notch{
+  background:#050c16;height:24px;display:flex;
+  align-items:center;justify-content:center
+}
+.sos-notch-d{width:8px;height:8px;background:#111;border-radius:50%}
+.sos-phone-hdr{
+  background:rgba(211,47,47,.08);padding:.7rem 1rem;
+  display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid rgba(211,47,47,.15)
+}
+.sos-hdr-label{
+  font-family:var(--mono);font-size:.55rem;color:var(--sos);
+  letter-spacing:.12em;text-transform:uppercase;flex:1
+}
+.sos-phone-body{flex:1;padding:1.2rem;display:flex;flex-direction:column;gap:.9rem}
+.sos-ring-btn{
+  width:80px;height:80px;border-radius:50%;border:3px solid var(--sos);
+  display:flex;align-items:center;justify-content:center;
+  margin:.8rem auto;position:relative;cursor:pointer;
+  animation:sosBtnPulse 1.6s ease-out infinite
+}
+.sos-ring-btn::before,.sos-ring-btn::after{
+  content:'';position:absolute;border-radius:50%;
+  border:2px solid var(--sos);
+  animation:sosBtnRing 1.6s ease-out infinite
+}
+.sos-ring-btn::after{inset:-22px;animation-delay:.4s}
+@keyframes sosBtnPulse{
+  0%{box-shadow:0 0 0 0 rgba(211,47,47,.5)}
+  70%{box-shadow:0 0 0 20px rgba(211,47,47,0)}
+  100%{box-shadow:0 0 0 0 rgba(211,47,47,0)}
+}
+@keyframes sosBtnRing{
+  0%{transform:scale(1);opacity:.7}100%{transform:scale(1.7);opacity:0}
+}
+.sos-btn-inner{
+  width:52px;height:52px;background:var(--sos);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .1s
+}
+.sos-btn-inner:active{transform:scale(.92)}
+.sos-btn-inner svg{width:24px;height:24px;stroke:white;stroke-width:2}
+.sos-hint{
+  font-family:var(--mono);font-size:.52rem;color:rgba(255,255,255,.25);
+  letter-spacing:.1em;text-transform:uppercase;text-align:center
+}
+.sos-info-box{
+  background:rgba(211,47,47,.07);border:1px solid rgba(211,47,47,.14);
+  border-radius:10px;padding:.7rem .9rem
+}
+.sos-info-box.ok{background:rgba(46,125,50,.07);border-color:rgba(46,125,50,.14)}
+.sos-info-title{
+  font-family:var(--syne);font-size:.78rem;font-weight:700;
+  color:var(--sos);margin-bottom:.25rem
+}
+.sos-info-box.ok .sos-info-title{color:var(--safe)}
+.sos-info-text{font-family:var(--mono);font-size:.55rem;color:rgba(255,255,255,.35);line-height:1.5}
+.sos-contact-list{display:flex;flex-direction:column;gap:.3rem}
+.sos-contact-row{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.04);
+  font-family:var(--mono);font-size:.6rem;color:rgba(255,255,255,.5)
+}
+.sos-contact-row svg{width:12px;height:12px;stroke:var(--sos);flex-shrink:0}
+.sos-contact-row .cr-status{margin-left:auto;font-size:.52rem}
+.sos-contact-row .cr-status.ok{color:var(--safe)}
 
-/* ════════════════════════════════════════════════════════
-   SCHOOL CARDS
-═══════════════════════════════════════════════════════ */
-#schools { padding: 8rem 0; background: var(--bg2); }
-.school-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 3rem;
+/* SOS right — description */
+.sos-desc{ }
+.sos-desc-tag{color:var(--sos)}
+.sos-desc-title{
+  font-family:var(--syne);font-size:2.4rem;font-weight:800;
+  line-height:1.1;letter-spacing:-.025em;color:var(--text);margin-bottom:1.2rem
 }
-.school-card {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 18px; overflow: hidden;
-  transition: transform .25s, box-shadow .25s, border-color .25s;
+.sos-desc-title span{display:block;color:var(--text2);font-weight:400;font-size:1.4rem}
+.sos-steps{display:flex;flex-direction:column;gap:.6rem;margin-top:2rem}
+.sos-step{display:flex;gap:1rem;align-items:flex-start}
+.sos-step-n{
+  width:32px;height:32px;background:rgba(211,47,47,.1);
+  border:1px solid rgba(211,47,47,.2);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--syne);font-size:.82rem;font-weight:700;
+  color:var(--sos);flex-shrink:0
 }
-.school-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,.09); border-color: var(--amber); }
-.sch-card-head {
-  padding: 1.3rem 1.3rem 1rem;
-  display: flex; align-items: flex-start; gap: 1rem;
-  border-bottom: 1px solid var(--border);
-}
-.sch-logo {
-  width: 48px; height: 48px; background: var(--amber-lt);
-  border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.sch-logo svg { width: 26px; height: 26px; stroke: var(--amber-dk); }
-.sch-info { flex: 1; }
-.sch-name { font-family: var(--syne); font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
-.sch-loc { font-family: var(--mono); font-size: .58rem; color: var(--muted); display: flex; align-items: center; gap: .3rem; }
-.sch-loc svg { width: 10px; height: 10px; stroke: var(--muted); }
-.sch-live {
-  display: flex; align-items: center; gap: .3rem;
-  font-family: var(--mono); font-size: .52rem;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: var(--green); background: var(--green-lt);
-  padding: .18rem .5rem; border-radius: 20px; flex-shrink: 0;
-}
-.sch-live::before {
-  content: ''; width: 5px; height: 5px; background: var(--green);
-  border-radius: 50%; box-shadow: 0 0 4px var(--green); animation: ping 2s infinite;
-}
-.sch-card-body { padding: 1rem 1.3rem 1.3rem; display: flex; gap: 1.2rem; }
-.sch-metric { display: flex; flex-direction: column; gap: .1rem; }
-.sch-mv { font-family: var(--syne); font-size: 1.4rem; font-weight: 800; color: var(--text); line-height: 1; }
-.sch-ml { font-family: var(--mono); font-size: .52rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-.sch-div { width: 1px; background: var(--border); }
-.sch-mv.ok { color: var(--green); }
-.sch-mv.warn { color: var(--amber-dk); }
+.sos-step-t{font-family:var(--outfit);font-size:.88rem;color:var(--text2);line-height:1.55;padding-top:.3rem}
+.sos-step-t strong{color:var(--text)}
 
-/* ════════════════════════════════════════════════════════
-   SOS DEMO
-═══════════════════════════════════════════════════════ */
-#sosdemo { padding: 8rem 0; background: var(--panel); }
-.sos-layout {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; margin-top: 3rem;
+/* ─────────────────────────────────────────────────────
+   SCHOOL CARDS — PREMIUM BADGES
+───────────────────────────────────────────────────── */
+#schools{
+  padding:10rem 0;background:var(--bg);position:relative
 }
-.sos-phone {
-  background: #111; border-radius: 30px; padding: 10px; max-width: 270px; margin: 0 auto;
-  box-shadow: 0 20px 70px rgba(0,0,0,.3);
+#schools .road-grid{position:absolute;inset:0}
+.school-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;
+  margin-top:3rem;position:relative;z-index:1
 }
-.sos-screen { background: var(--text); border-radius: 22px; overflow: hidden; min-height: 480px; display: flex; flex-direction: column; }
-.sos-notch { background: #0a0a0a; height: 26px; display: flex; align-items: center; justify-content: center; }
-.sos-notch-dot { width: 8px; height: 8px; background: #1a1a1a; border-radius: 50%; }
-.sos-phone-hdr {
-  background: rgba(244,67,54,.08); padding: .7rem 1rem;
-  display: flex; align-items: center; gap: .6rem;
-  border-bottom: 1px solid rgba(244,67,54,.15);
+.school-card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:18px;overflow:hidden;
+  transition:transform .35s var(--ease),box-shadow .35s,border-color .35s
 }
-.sos-hdr-label { font-family: var(--mono); font-size: .58rem; color: var(--red); letter-spacing: .12em; text-transform: uppercase; flex: 1; }
-.sos-phone-body { flex: 1; padding: 1.2rem; display: flex; flex-direction: column; gap: .9rem; }
-.sos-pulse-ring {
-  width: 84px; height: 84px; border-radius: 50%;
-  border: 3px solid var(--red);
-  display: flex; align-items: center; justify-content: center;
-  margin: 1rem auto; position: relative;
-  animation: sosRingPulse 1.4s ease-out infinite;
-  cursor: pointer;
+.school-card:hover{
+  transform:translateY(-6px) perspective(800px) rotateX(2deg);
+  box-shadow:0 24px 60px rgba(0,0,0,.35);border-color:var(--border-hi)
 }
-.sos-pulse-ring::before, .sos-pulse-ring::after {
-  content: ''; position: absolute; inset: -14px;
-  border-radius: 50%; border: 2px solid var(--red);
-  animation: sosRingOuter 1.4s ease-out infinite;
+.sch-card-head{
+  padding:1.4rem 1.4rem 1.1rem;
+  display:flex;align-items:flex-start;gap:1rem;
+  border-bottom:1px solid var(--border)
 }
-.sos-pulse-ring::after { inset: -28px; animation-delay: .35s; }
-@keyframes sosRingPulse {
-  0% { box-shadow: 0 0 0 0 rgba(244,67,54,.5); }
-  70% { box-shadow: 0 0 0 22px rgba(244,67,54,0); }
-  100% { box-shadow: 0 0 0 0 rgba(244,67,54,0); }
+.sch-logo{
+  width:48px;height:48px;background:rgba(212,175,55,.08);
+  border:1px solid rgba(212,175,55,.15);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0
 }
-@keyframes sosRingOuter {
-  0% { transform: scale(1); opacity: .7; }
-  100% { transform: scale(1.6); opacity: 0; }
+.sch-logo svg{width:22px;height:22px;stroke:var(--gold)}
+.sch-info{flex:1}
+.sch-name{
+  font-family:var(--syne);font-size:.95rem;font-weight:700;
+  color:var(--text);margin-bottom:.3rem
 }
-.sos-btn-center {
-  width: 54px; height: 54px; background: var(--red);
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  transition: transform .1s;
+.sch-loc{
+  font-family:var(--mono);font-size:.58rem;color:var(--muted);
+  display:flex;align-items:center;gap:.3rem
 }
-.sos-btn-center:active { transform: scale(.94); }
-.sos-btn-center svg { width: 26px; height: 26px; stroke: white; }
-.sos-hint { font-family: var(--mono); font-size: .55rem; color: rgba(255,255,255,.3); letter-spacing: .1em; text-transform: uppercase; text-align: center; margin-top: .5rem; }
-.sos-info-box {
-  background: rgba(244,67,54,.07); border: 1px solid rgba(244,67,54,.14);
-  border-radius: 10px; padding: .7rem .9rem;
+.sch-loc svg{width:10px;height:10px;stroke:var(--muted)}
+.sch-live{
+  display:flex;align-items:center;gap:.3rem;
+  font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--safe);
+  background:rgba(46,125,50,.08);padding:.18rem .6rem;
+  border-radius:20px;border:1px solid rgba(46,125,50,.2);
+  flex-shrink:0
 }
-.sos-info-title { font-family: var(--syne); font-size: .78rem; font-weight: 700; color: var(--red); margin-bottom: .3rem; }
-.sos-info-text { font-family: var(--mono); font-size: .56rem; color: rgba(255,255,255,.4); line-height: 1.5; }
-.sos-info-box.ok { background: rgba(46,125,50,.07); border-color: rgba(46,125,50,.14); }
-.sos-info-box.ok .sos-info-title { color: var(--green); }
-.sos-contact { display: flex; flex-direction: column; gap: .4rem; }
-.sos-contact-row {
-  display: flex; align-items: center; gap: .6rem;
-  padding: .4rem 0; border-bottom: 1px solid rgba(255,255,255,.04);
-  font-family: var(--mono); font-size: .62rem; color: rgba(255,255,255,.6);
+.sch-live::before{content:'';width:5px;height:5px;background:var(--safe);border-radius:50%;animation:ping 2s infinite;box-shadow:0 0 4px var(--safe)}
+.sch-card-body{padding:1.1rem 1.4rem 1.4rem;display:flex;gap:1.2rem}
+.sch-metric{display:flex;flex-direction:column;gap:.1rem}
+.sch-mv{
+  font-family:var(--syne);font-size:1.4rem;font-weight:800;
+  color:var(--text);line-height:1
 }
-.sos-contact-row svg { width: 13px; height: 13px; stroke: var(--red); flex-shrink: 0; }
-.sos-contact-row span { color: rgba(255,255,255,.3); font-size: .52rem; margin-left: auto; }
+.sch-mv.ok{color:var(--safe)}
+.sch-mv.warn{color:var(--amber)}
+.sch-ml{
+  font-family:var(--mono);font-size:.52rem;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.08em
+}
+.sch-div{width:1px;background:var(--border)}
 
-/* SOS right description */
-.sos-desc-tag { color: var(--red); }
-.sos-title { font-family: var(--syne); font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1.15; margin-bottom: 1rem; }
-.sos-title span { color: var(--red); }
-.sos-body { font-size: .88rem; color: var(--text2); line-height: 1.8; margin-bottom: 1.8rem; }
-.sos-steps { display: flex; flex-direction: column; gap: .7rem; }
-.sos-step { display: flex; align-items: flex-start; gap: .8rem; padding: .7rem; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; }
-.sos-step-n { width: 22px; height: 22px; background: var(--red); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--syne); font-size: .68rem; font-weight: 700; flex-shrink: 0; }
-.sos-step-t { font-size: .82rem; color: var(--text2); line-height: 1.5; }
-.sos-step-t strong { color: var(--text); font-weight: 500; }
-
-/* ════════════════════════════════════════════════════════
-   PARENT NOTIFICATION DEMO
-═══════════════════════════════════════════════════════ */
-#notifydemo { padding: 8rem 0; background: var(--bg2); }
-.notify-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; margin-top: 3rem; }
-.notify-phone { background: #111; border-radius: 30px; padding: 10px; max-width: 270px; margin: 0 auto; box-shadow: 0 20px 70px rgba(0,0,0,.22); }
-.notify-screen { background: var(--bg2); border-radius: 22px; overflow: hidden; min-height: 480px; display: flex; flex-direction: column; }
-.notify-ph { background: white; padding: .7rem 1rem; display: flex; align-items: center; gap: .7rem; border-bottom: 1px solid var(--border); }
-.notify-app-icon { width: 28px; height: 28px; background: var(--amber); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-.notify-app-icon svg { width: 16px; height: 16px; }
-.notify-app-name { font-family: var(--syne); font-size: .78rem; font-weight: 700; color: var(--text); }
-.notify-time { font-family: var(--mono); font-size: .52rem; color: var(--muted); margin-left: auto; }
-.notify-body { flex: 1; padding: .9rem; display: flex; flex-direction: column; gap: .7rem; }
-.notify-card {
-  background: white; border-radius: 14px; overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0,0,0,.06);
-  animation: notifyIn .4s ease-out;
+/* ─────────────────────────────────────────────────────
+   TESTIMONIALS — PREMIUM VOICE
+───────────────────────────────────────────────────── */
+#testimonials{
+  padding:10rem 0;background:var(--panel);position:relative;overflow:hidden
 }
-@keyframes notifyIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-.notify-card-hdr { padding: .45rem .8rem; display: flex; align-items: center; gap: .5rem; border-bottom: 1px solid var(--border); }
-.notify-card-hdr.ylw { background: var(--amber-lt); border-color: rgba(255,193,7,.15); }
-.notify-card-hdr.blu { background: var(--blue-lt); border-color: rgba(33,150,243,.15); }
-.notify-card-hdr.grn { background: var(--green-lt); border-color: rgba(46,125,50,.15); }
-.notify-card-from { font-family: var(--mono); font-size: .58rem; color: var(--amber-dk); letter-spacing: .05em; }
-.notify-card-hdr.blu .notify-card-from { color: var(--blue); }
-.notify-card-hdr.grn .notify-card-from { color: var(--green); }
-.notify-card-from svg { width: 12px; height: 12px; stroke: currentColor; margin-right: .2rem; vertical-align: middle; }
-.notify-card-body { padding: .7rem .8rem; }
-.notify-card-title { font-family: var(--syne); font-size: .82rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
-.notify-card-msg { font-size: .75rem; color: var(--text2); line-height: 1.5; }
-.notify-card-ftr { padding: .35rem .8rem .55rem; display: flex; align-items: center; justify-content: space-between; }
-.notify-card-time { font-family: var(--mono); font-size: .52rem; color: var(--muted); }
-.notify-tag { font-family: var(--mono); font-size: .5rem; text-transform: uppercase; letter-spacing: .07em; padding: .12rem .35rem; border-radius: 3px; background: var(--green-lt); color: var(--green); }
-.notify-tag.y { background: var(--amber-lt); color: var(--amber-dk); }
-.notify-tag.b { background: var(--blue-lt); color: var(--blue); }
-.notify-cta { margin: .7rem .8rem; background: var(--amber); color: var(--text); font-family: var(--syne); font-size: .78rem; font-weight: 600; padding: .65rem; border-radius: 8px; text-align: center; display: flex; align-items: center; justify-content: center; gap: .5rem; box-shadow: 0 4px 12px rgba(255,193,7,.25); }
-.notify-cta svg { width: 13px; height: 13px; stroke: currentColor; }
+#testimonials::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 50% 60% at 50% 50%,rgba(212,175,55,.03) 0%,transparent 70%)
+}
+.testi-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;
+  margin-top:3rem;position:relative;z-index:1
+}
+.testi-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;padding:2rem;position:relative;
+  overflow:hidden;transition:transform .3s var(--ease),border-color .3s
+}
+.testi-card:hover{transform:translateY(-4px);border-color:var(--border-hi)}
+.testi-q{
+  font-family:var(--syne);font-size:5rem;font-weight:800;
+  color:rgba(212,175,55,.15);line-height:.7;margin-bottom:.5rem
+}
+.testi-stars{display:flex;gap:.2rem;margin-bottom:1rem}
+.testi-stars svg{width:14px;height:14px;fill:var(--gold)}
+.testi-text{
+  font-family:var(--outfit);font-size:.92rem;
+  color:var(--text2);line-height:1.75;margin-bottom:1.5rem;
+  font-style:italic
+}
+.testi-author{display:flex;align-items:center;gap:.8rem}
+.testi-avatar{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--syne);font-size:.75rem;font-weight:700;
+  flex-shrink:0
+}
+.testi-name{
+  font-family:var(--syne);font-size:.82rem;font-weight:700;
+  color:var(--text);display:block
+}
+.testi-role{
+  font-family:var(--mono);font-size:.55rem;color:var(--muted);
+  display:block;margin-top:.1rem
+}
+.testi-play{
+  position:absolute;top:1.5rem;right:1.5rem;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .25s
+}
+.testi-play:hover{background:var(--gold);transform:scale(1.1)}
+.testi-play svg{width:12px;height:12px;fill:var(--gold);margin-left:2px}
+.testi-play:hover svg{fill:var(--trust)}
 
-/* Notify description */
-.notify-tag.green { color: var(--green); }
-.notify-title { font-family: var(--syne); font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1.15; margin-bottom: 1rem; }
-.notify-title span { color: var(--blue); }
-.notify-body-text { font-size: .88rem; color: var(--text2); line-height: 1.8; margin-bottom: 1.5rem; }
-.notify-types { display: flex; flex-direction: column; gap: .65rem; }
-.notify-type { display: flex; align-items: flex-start; gap: .8rem; padding: .65rem; background: white; border: 1px solid var(--border); border-radius: 10px; }
-.notify-type-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.notify-type-icon svg { width: 15px; height: 15px; }
-.notify-type-icon.grn { background: var(--green-lt); }
-.notify-type-icon.grn svg { stroke: var(--green); }
-.notify-type-icon.blu { background: var(--blue-lt); }
-.notify-type-icon.blu svg { stroke: var(--blue); }
-.notify-type-icon.ylw { background: var(--amber-lt); }
-.notify-type-icon.ylw svg { stroke: var(--amber-dk); }
-.notify-type-text { font-size: .82rem; color: var(--text2); line-height: 1.5; }
-.notify-type-text strong { color: var(--text); font-weight: 500; display: block; margin-bottom: .1rem; }
+/* ─────────────────────────────────────────────────────
+   CTA — INVESTMENT SECTION
+───────────────────────────────────────────────────── */
+#cta{
+  padding:10rem 0;background:var(--bg);position:relative;overflow:hidden
+}
+.cta-glow{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:400px;background:radial-gradient(ellipse,rgba(212,175,55,.07) 0%,transparent 70%)
+}
+.cta-inner{
+  position:relative;z-index:1;text-align:center;
+  max-width:700px;margin:0 auto
+}
+.cta-tag{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem
+}
+.cta-title{
+  font-family:var(--syne);font-size:clamp(2.8rem,5vw,5rem);
+  font-weight:800;line-height:1;letter-spacing:-.03em;
+  color:var(--text);margin-bottom:1.2rem
+}
+.cta-title .g{color:var(--gold)}
+.cta-body{
+  font-family:var(--outfit);font-size:1rem;color:var(--text2);
+  max-width:520px;margin:0 auto 3rem;line-height:1.75
+}
+.cta-actions{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap}
+.btn-cta-primary{
+  display:inline-flex;align-items:center;gap:.6rem;
+  font-family:var(--syne);font-size:.88rem;font-weight:700;
+  letter-spacing:.03em;padding:1rem 2.4rem;
+  background:var(--gold);color:var(--trust);
+  border-radius:8px;
+  box-shadow:0 4px 30px rgba(212,175,55,.3);
+  transition:all .25s var(--ease)
+}
+.btn-cta-primary:hover{background:#e8c040;transform:translateY(-2px);box-shadow:0 8px 40px rgba(212,175,55,.4)}
+.btn-cta-secondary{
+  display:inline-flex;align-items:center;gap:.6rem;
+  font-family:var(--syne);font-size:.88rem;font-weight:600;
+  padding:1rem 2rem;border:1px solid var(--border);
+  color:var(--text2);border-radius:8px;
+  transition:all .25s var(--ease)
+}
+.btn-cta-secondary:hover{border-color:var(--text2);color:var(--text);transform:translateY(-1px)}
+.cta-trust{
+  display:flex;gap:2.5rem;justify-content:center;margin-top:2.5rem;
+  padding-top:2rem;border-top:1px solid var(--border)
+}
+.cta-trust-item{text-align:center}
+.cta-trust-n{
+  font-family:var(--syne);font-size:1.1rem;font-weight:800;
+  color:var(--text)
+}
+.cta-trust-l{
+  font-family:var(--mono);font-size:.55rem;color:var(--muted);
+  letter-spacing:.12em;text-transform:uppercase;margin-top:.2rem
+}
 
-/* ════════════════════════════════════════════════════════
-   TESTIMONIALS
-═══════════════════════════════════════════════════════ */
-#testimonials { padding: 8rem 0; background: var(--panel); }
-.testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.2rem; margin-top: 3rem; }
-.testi-card { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; position: relative; overflow: hidden; transition: transform .25s, box-shadow .25s; }
-.testi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,.08); }
-.testi-q { position: absolute; right: 1rem; top: .3rem; font-family: var(--syne); font-size: 5.5rem; font-weight: 800; color: var(--amber); opacity: .07; line-height: 1; pointer-events: none; }
-.testi-stars { display: flex; gap: .12rem; margin-bottom: 1rem; }
-.testi-stars svg { width: 13px; height: 13px; fill: var(--amber); stroke: var(--amber); stroke-width: 1.5; }
-.testi-text { font-size: .86rem; font-weight: 300; color: var(--text2); line-height: 1.8; margin-bottom: 1.3rem; font-style: italic; }
-.testi-author { display: flex; align-items: center; gap: .8rem; }
-.testi-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--syne); font-size: .82rem; font-weight: 700; flex-shrink: 0; }
-.testi-name { font-family: var(--syne); font-size: .85rem; font-weight: 700; color: var(--text); display: block; }
-.testi-role { font-family: var(--mono); font-size: .58rem; color: var(--muted); display: block; margin-top: .12rem; letter-spacing: .04em; }
-.testi-school { display: flex; align-items: center; gap: .4rem; margin-top: .6rem; padding-top: .6rem; border-top: 1px solid var(--border); font-family: var(--mono); font-size: .55rem; color: var(--muted); letter-spacing: .05em; }
-.testi-school svg { width: 13px; height: 13px; stroke: var(--blue); }
-
-/* ════════════════════════════════════════════════════════
-   CTA
-═══════════════════════════════════════════════════════ */
-#cta { padding: 8rem 0; background: var(--text); position: relative; overflow: hidden; }
-#cta::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px); background-size: 50px 50px; }
-.cta-glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(255,193,7,.12) 0%, transparent 65%); top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
-.cta-inner { text-align: center; position: relative; z-index: 1; }
-.cta-title { font-family: var(--syne); font-size: clamp(2.5rem, 5.5vw, 5rem); font-weight: 800; color: white; line-height: .95; letter-spacing: -.025em; margin-bottom: 1.4rem; }
-.cta-title .a { color: var(--amber); }
-.cta-sub { font-size: .92rem; font-weight: 300; color: rgba(255,255,255,.45); max-width: 420px; margin: 0 auto 2.5rem; line-height: 1.8; }
-.cta-actions { display: flex; justify-content: center; gap: .85rem; flex-wrap: wrap; }
-.cta-pri { display: inline-flex; align-items: center; gap: .6rem; font-family: var(--syne); font-size: .86rem; font-weight: 700; padding: .9rem 2rem; background: var(--amber); color: var(--text); border-radius: 8px; box-shadow: 0 4px 20px rgba(255,193,7,.3); transition: background .2s, transform .15s; }
-.cta-pri:hover { background: var(--amber-dk); transform: translateY(-2px); }
-.cta-sec { display: inline-flex; align-items: center; gap: .6rem; font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; padding: .9rem 1.6rem; border: 1.5px solid rgba(255,255,255,.14); color: rgba(255,255,255,.55); border-radius: 8px; transition: border-color .2s, color .2s; }
-.cta-sec:hover { border-color: var(--green); color: var(--green); }
-.contact-strip { display: flex; justify-content: center; gap: 2.5rem; margin-top: 3rem; flex-wrap: wrap; }
-.contact-item { display: flex; align-items: center; gap: .55rem; font-family: var(--mono); font-size: .65rem; color: rgba(255,255,255,.3); }
-.contact-item svg { width: 13px; height: 13px; stroke: var(--amber); }
-
-/* ════════════════════════════════════════════════════════
+/* ─────────────────────────────────────────────────────
    FOOTER
-═══════════════════════════════════════════════════════ */
-footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
-.footer-main { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 3rem; padding: 3.5rem 3rem; max-width: 1240px; margin: 0 auto; }
-.foot-brand { font-family: var(--syne); font-size: .88rem; font-weight: 700; color: white; display: flex; align-items: center; gap: .6rem; margin-bottom: .8rem; }
-.foot-tag { font-size: .8rem; font-weight: 300; color: rgba(255,255,255,.3); line-height: 1.7; }
-.foot-col-title { font-family: var(--mono); font-size: .56rem; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.2); margin-bottom: 1rem; }
-.foot-links { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
-.foot-links a { font-size: .82rem; color: rgba(255,255,255,.35); font-weight: 300; transition: color .2s; }
-.foot-links a:hover { color: var(--amber); }
-.footer-bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,.04); padding: 1.2rem 3rem; max-width: 1240px; margin: 0 auto; flex-wrap: wrap; gap: .8rem; }
-.foot-legal { font-family: var(--mono); font-size: .56rem; color: rgba(255,255,255,.18); letter-spacing: .05em; }
-.foot-live { display: flex; align-items: center; gap: .45rem; font-family: var(--mono); font-size: .56rem; color: var(--green); letter-spacing: .1em; }
-.foot-live::before { content: ''; width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: ping 2s infinite; box-shadow: 0 0 4px var(--green); }
-
-/* ════════════════════════════════════════════════════════
-   SCROLL REVEAL
-═══════════════════════════════════════════════════════ */
-.reveal { opacity: 0; transform: translateY(28px); }
-.reveal.l { transform: translateX(-28px); }
-.reveal.r { transform: translateX(28px); }
-.reveal.sc { transform: scale(.94); }
-
-/* ════════════════════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════════════════ */
-@media (max-width: 1100px) {
-  .section-header { grid-template-columns: 1fr; gap: 2rem; }
-  .sos-layout { grid-template-columns: 1fr; }
-  .notify-layout { grid-template-columns: 1fr; }
-  .school-grid { grid-template-columns: repeat(2,1fr); }
-  .testi-grid { grid-template-columns: repeat(2,1fr); }
-  .stats-inner { grid-template-columns: repeat(3,1fr); }
-  .stat-block { border-bottom: 1px solid rgba(255,255,255,.06); }
-  .map-bus-list { grid-template-columns: repeat(2,1fr); }
-  .footer-main { grid-template-columns: 1fr; gap: 2rem; }
-  .hero-3d-bus { display: none; }
+───────────────────────────────────────────────────── */
+footer{
+  background:var(--panel);border-top:1px solid var(--border);
+  padding:4rem 0 2rem
 }
-@media (max-width: 768px) {
-  nav { padding: 0 1.5rem; }
-  .nav-links { display: none; }
-  #hero { padding: 100px 1.5rem 4rem; }
-  .hero-content { padding-right: 0; }
-  .inner { padding: 0 1.5rem; }
-  .sec-title { font-size: 2rem; }
-  .school-grid { grid-template-columns: 1fr; }
-  .testi-grid { grid-template-columns: 1fr; }
-  .stats-inner { grid-template-columns: repeat(2,1fr); }
-  .map-bus-list { grid-template-columns: 1fr; }
-  .cta-title { font-size: 2.4rem; }
-  footer { padding: 0; }
-  .footer-main, .footer-bottom { padding: 2rem 1.5rem; }
-  #stats, #livemap, #schools, #sosdemo, #notifydemo, #testimonials, #cta { padding: 5rem 0; }
+.footer-inner{max-width:1300px;margin:0 auto;padding:0 5vw}
+.footer-top{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;
+  margin-bottom:3rem
+}
+.footer-brand{}
+.footer-logo{
+  display:flex;align-items:center;gap:.7rem;
+  font-family:var(--syne);font-size:1rem;font-weight:700;
+  color:var(--text);margin-bottom:1rem
+}
+.footer-logo svg{width:28px;height:28px}
+.footer-tagline{
+  font-family:var(--outfit);font-size:.85rem;
+  color:var(--text2);line-height:1.65;max-width:260px
+}
+.footer-col-title{
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:1rem
+}
+.footer-links{display:flex;flex-direction:column;gap:.6rem}
+.footer-links a{
+  font-family:var(--outfit);font-size:.85rem;color:var(--text2);
+  transition:color .2s
+}
+.footer-links a:hover{color:var(--gold)}
+.footer-bottom{
+  padding-top:1.5rem;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center
+}
+.footer-copy{
+  font-family:var(--mono);font-size:.58rem;color:var(--muted)
+}
+.footer-legal{display:flex;gap:1.5rem}
+.footer-legal a{font-family:var(--mono);font-size:.58rem;color:var(--muted);transition:color .2s}
+.footer-legal a:hover{color:var(--text2)}
+
+/* ─────────────────────────────────────────────────────
+   REVEAL ANIMATIONS
+───────────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(30px)}
+.reveal.l{opacity:0;transform:translateX(-40px)}
+.reveal.r{opacity:0;transform:translateX(40px)}
+
+/* SVG path draw */
+.draw-path{stroke-dasharray:1000;stroke-dashoffset:1000}
+
+/* Mobile responsive */
+@media(max-width:900px){
+  #hero{grid-template-columns:1fr}
+  #hero #three-canvas{height:50vh;position:relative}
+  .hero-content{padding:7rem 6vw 4rem;max-width:100%}
+  .hero-h1{font-size:clamp(2.8rem,9vw,4.5rem)}
+  .nav-links{display:none}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:.8rem}
+  .stat-card.featured{grid-column:1/-1}
+  .stat-card{border-right:none;border-bottom:1px solid var(--border)}
+  .section-header{grid-template-columns:1fr}
+  .map-driver-list{grid-template-columns:1fr 1fr}
+  .school-grid{grid-template-columns:1fr}
+  .sos-layout{grid-template-columns:1fr}
+  .testi-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr}
+  .cta-trust{flex-wrap:wrap;gap:1.5rem}
 }
 </style>
 </head>
 <body>
 
-<!-- LOADER -->
-<div id="loader">
-  <div class="loader-logo">ScholarTrack</div>
-  <svg class="loader-bus-svg" viewBox="0 0 64 40" fill="none">
-    <rect x="2" y="12" width="60" height="24" rx="4" fill="#FFC107"/>
-    <rect x="8" y="4" width="36" height="10" rx="3" fill="#FFC107"/>
-    <rect x="46" y="6" width="14" height="6" rx="2" fill="#FFC107"/>
-    <circle cx="16" cy="38" r="5" fill="#333"/>
-    <circle cx="16" cy="38" r="2.5" fill="#555"/>
-    <circle cx="48" cy="38" r="5" fill="#333"/>
-    <circle cx="48" cy="38" r="2.5" fill="#555"/>
-    <rect x="10" y="16" width="10" height="8" rx="1.5" fill="white" opacity=".7"/>
-    <rect x="24" y="16" width="10" height="8" rx="1.5" fill="white" opacity=".7"/>
-    <rect x="38" y="16" width="10" height="8" rx="1.5" fill="white" opacity=".7"/>
-  </svg>
-  <div class="loader-bar-wrap"><div class="loader-bar" id="lbar"></div></div>
-  <div class="loader-pct" id="lpct">0%</div>
-</div>
-
 <!-- NAV -->
 <nav id="nav">
   <div class="nav-logo">
-    <div class="nav-bus-icon">
-      <div class="bw bw-l"></div>
-      <div class="bw bw-r"></div>
-    </div>
+    <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" stroke="#D4AF37" stroke-width="1.5"/><path d="M8 16c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#D4AF37" stroke-width="1.5"/><circle cx="16" cy="16" r="3" fill="#D4AF37"/><path d="M16 19v5" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/><path d="M8 24h16" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/></svg>
     ScholarTrack
   </div>
   <ul class="nav-links">
-    <li><a href="#livemap">Live Map</a></li>
+    <li><a href="#map-section">Live Map</a></li>
+    <li><a href="#sos-demo">SOS Demo</a></li>
     <li><a href="#schools">Schools</a></li>
-    <li><a href="#sosdemo">SOS Demo</a></li>
     <li><a href="#testimonials">Testimonials</a></li>
   </ul>
   <a href="#cta" class="nav-cta">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
     Request Demo
   </a>
 </nav>
 
 <!-- HERO -->
 <section id="hero">
-  <div class="hero-road-bg"></div>
-  <div class="hero-glow-amber"></div>
-  <div class="hero-glow-green"></div>
-
-  <!-- Private car SVG — individual driver vehicle with ScholarTrack branding -->
-  <div class="hero-3d-bus">
-    <svg width="340" height="200" viewBox="0 0 340 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- shadow -->
-      <ellipse cx="170" cy="190" rx="120" ry="10" fill="rgba(0,0,0,.1)"/>
-      <!-- car body -->
-      <rect x="25" y="95" width="290" height="68" rx="22" fill="#FFC107"/>
-      <!-- cabin / roof -->
-      <rect x="60" y="52" width="210" height="50" rx="18" fill="#FFC107"/>
-      <!-- ScholarTrack logo circle on door -->
-      <circle cx="170" cy="125" r="20" fill="#e6a800" opacity=".45"/>
-      <text x="170" y="130" font-family="sans-serif" font-size="12" font-weight="800" fill="#1a1f2e" text-anchor="middle" letter-spacing=".5">ST</text>
-      <!-- windshield -->
-      <rect x="230" y="58" width="78" height="38" rx="10" fill="#E3F2FD" opacity=".85"/>
-      <!-- side windows strip -->
-      <rect x="65" y="58" width="160" height="38" rx="10" fill="#E3F2FD" opacity=".75"/>
-      <!-- rear window -->
-      <rect x="62" y="58" width="50" height="38" rx="8" fill="#E3F2FD" opacity=".6"/>
-      <!-- wheels -->
-      <circle cx="92" cy="163" r="26" fill="#2a2a2a"/>
-      <circle cx="92" cy="163" r="17" fill="#3d3d3d"/>
-      <circle cx="92" cy="163" r="8" fill="#555"/>
-      <circle cx="92" cy="163" r="4" fill="#777"/>
-      <circle cx="248" cy="163" r="26" fill="#2a2a2a"/>
-      <circle cx="248" cy="163" r="17" fill="#3d3d3d"/>
-      <circle cx="248" cy="163" r="8" fill="#555"/>
-      <circle cx="248" cy="163" r="4" fill="#777"/>
-      <!-- wheel wells shadow -->
-      <path d="M68 163 Q92 146 116 163" stroke="rgba(0,0,0,.1)" stroke-width="3" fill="none"/>
-      <path d="M224 163 Q248 146 272 163" stroke="rgba(0,0,0,.1)" stroke-width="3" fill="none"/>
-      <!-- headlights -->
-      <rect x="292" y="108" width="14" height="22" rx="6" fill="#FFF9C4" opacity=".9"/>
-      <rect x="292" y="134" width="14" height="10" rx="5" fill="#FFF9C4" opacity=".55"/>
-      <!-- tail lights -->
-      <rect x="38" y="110" width="10" height="22" rx="5" fill="#F44336" opacity=".8"/>
-      <rect x="38" y="136" width="10" height="10" rx="5" fill="#F44336" opacity=".45"/>
-      <!-- road reflection -->
-      <rect x="25" y="163" width="290" height="4" rx="2" fill="rgba(0,0,0,.07)"/>
-      <!-- floating GPS pins -->
-      <g transform="translate(310,30)" class="gps-float">
-        <circle r="8" fill="#2196F3" opacity=".25"/>
-        <circle r="5" fill="#2196F3" opacity=".5"/>
-        <circle r="3" fill="#2196F3"/>
-      </g>
-      <g transform="translate(20,50)" class="gps-float2">
-        <circle r="6" fill="#2E7D32" opacity=".25"/>
-        <circle r="4" fill="#2E7D32" opacity=".5"/>
-        <circle r="2.5" fill="#2E7D32"/>
-      </g>
-      <g transform="translate(295,90)" class="gps-float3">
-        <circle r="6" fill="#FFC107" opacity=".25"/>
-        <circle r="4" fill="#FFC107" opacity=".5"/>
-        <circle r="2.5" fill="#FFC107"/>
-      </g>
-      <style>
-        .gps-float { animation: gpsFloat 2.5s ease-in-out infinite; }
-        .gps-float2 { animation: gpsFloat 3s ease-in-out infinite .6s; }
-        .gps-float3 { animation: gpsFloat 2.8s ease-in-out infinite 1.2s; }
-        @keyframes gpsFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-      </style>
-    </svg>
-  </div>
-
+  <div class="hero-bg road-grid"></div>
+  <canvas id="three-canvas"></canvas>
   <div class="hero-content">
-    <div class="hero-badge">
-      <span class="hero-badge-dot"></span>
-      Live in 3 Gauteng Schools
-    </div>
+    <div class="hero-eyebrow">Verified Driver Marketplace — Gauteng, SA</div>
     <h1 class="hero-h1">
-      Every<br><span class="y">Child,</span><br>
-      <span class="b">Accounted For.</span>
+      Every Child,<br>
+      <span class="gradient-text">Accounted For.</span><br>
+      <span class="blue">Every Trip, Tracked.</span>
     </h1>
     <p class="hero-sub">
-      A marketplace for verified private car drivers serving South African schools.
-      <strong>Parents hire trusted drivers. Drivers earn from their cars. Children travel safely.</strong>
+      A <strong>two-sided marketplace</strong> connecting parents with verified private drivers.
+      Safety technology built for R100k+ investment grade — not a demo.
     </p>
-    <div class="hero-actions">
-      <a href="#cta" class="btn-primary">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        Request a Demo
+
+    <div class="role-toggle" id="role-toggle">
+      <div class="role-btn active" data-role="parent">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        I'm a Parent
+      </div>
+      <div class="role-btn" data-role="driver">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11a2 2 0 012 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="18" r="2"/></svg>
+        I'm a Driver
+      </div>
+    </div>
+
+    <div class="hero-actions" id="hero-actions">
+      <a href="#cta" class="btn-primary parent-action">
+        Find Trusted Drivers
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </a>
-      <a href="#livemap" class="btn-secondary">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        See Live Map
+      <a href="#cta" class="btn-ghost parent-action">See Live Map</a>
+      <a href="#cta" class="btn-ghost driver-action" style="display:none">
+        Start Earning
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </a>
     </div>
-    <div class="hero-counters">
-      <div class="hero-counter">
-        <div class="counter-n"><span id="hc-students">0</span></div>
-        <div class="counter-l">Students Tracked</div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-n"><span>209</span></div>
+        <div class="hero-stat-l">Students Tracked</div>
       </div>
-      <div class="counter-sep"></div>
-      <div class="hero-counter">
-        <div class="counter-n"><span id="hc-buses">0</span></div>
-        <div class="counter-l">Verified Drivers</div>
+      <div class="hero-stat">
+        <div class="hero-stat-n"><span>11</span></div>
+        <div class="hero-stat-l">Verified Drivers</div>
       </div>
-      <div class="counter-sep"></div>
-      <div class="hero-counter">
-        <div class="counter-n"><span id="hc-schools">0</span></div>
-        <div class="counter-l">Schools Active</div>
+      <div class="hero-stat">
+        <div class="hero-stat-n"><span>3</span></div>
+        <div class="hero-stat-l">Schools Active</div>
       </div>
     </div>
   </div>
 
   <div class="hero-scroll">
-    <div class="scroll-line"></div>
+    <div class="hero-scroll-line"></div>
     Scroll
   </div>
 </section>
@@ -888,150 +867,259 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
   <div class="ticker-track">
     <span class="s">&#9670;</span> Driver Marketplace &nbsp;&nbsp;
     <span class="s">&#9670;</span> Emergency SOS &nbsp;&nbsp;
-    <span class="s">&#9670;</span> Parent Notifications &nbsp;&nbsp;
+    <span class="s">&#9670;</span> Real-time GPS &nbsp;&nbsp;
     <span class="s">&#9670;</span> Verified Drivers &nbsp;&nbsp;
-    <span class="s">&#9670;</span> Admin Dashboard &nbsp;&nbsp;
     <span class="s">&#9670;</span> POPIA Compliant &nbsp;&nbsp;
+    <span class="s">&#9670;</span> R100k Platform &nbsp;&nbsp;
     <span class="s">&#9670;</span> Driver Marketplace &nbsp;&nbsp;
     <span class="s">&#9670;</span> Emergency SOS &nbsp;&nbsp;
-    <span class="s">&#9670;</span> Parent Notifications &nbsp;&nbsp;
+    <span class="s">&#9670;</span> Real-time GPS &nbsp;&nbsp;
     <span class="s">&#9670;</span> Verified Drivers &nbsp;&nbsp;
-    <span class="s">&#9670;</span> Admin Dashboard &nbsp;&nbsp;
-    <span class="s">&#9670;</span> POPIA Compliant
+    <span class="s">&#9670;</span> POPIA Compliant &nbsp;&nbsp;
+    <span class="s">&#9670;</span> R100k Platform
   </div>
 </div>
 
 <!-- STATS BAND -->
 <section id="stats">
-  <div class="stats-inner">
-    <div class="stat-block reveal">
-      <div class="stat-icon" style="background:rgba(255,193,7,.12)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#FFC107" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="22" height="12" rx="3"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+  <div class="inner">
+    <div class="stats-grid">
+      <div class="stat-card featured reveal">
+        <div class="stat-featured-label">// Platform Status</div>
+        <div class="stat-featured-title">Operational at 3 schools across Gauteng</div>
+        <div class="stat-featured-sub">247 registered families. 11 verified driver partners. All vehicles insured and tracked 24/7.</div>
       </div>
-      <div class="stat-n" data-target="12" data-sfx="">0</div>
-      <div class="stat-l">Verified Drivers</div>
-    </div>
-    <div class="stat-block reveal" style="transition-delay:.08s">
-      <div class="stat-icon" style="background:rgba(46,125,50,.15)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <div class="stat-card reveal">
+        <div class="stat-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <div class="stat-card-n" data-target="209"><span class="suf"></span></div>
+        <div class="stat-card-l">Students Tracked Daily</div>
       </div>
-      <div class="stat-n" data-target="247" data-sfx="">0</div>
-      <div class="stat-l">Students Tracked Daily</div>
-    </div>
-    <div class="stat-block reveal" style="transition-delay:.16s">
-      <div class="stat-icon" style="background:rgba(33,150,243,.12)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      <div class="stat-card reveal">
+        <div class="stat-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.5"><rect x="1" y="6" width="22" height="12" rx="3"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+        </div>
+        <div class="stat-card-n" data-target="11"><span class="suf"></span></div>
+        <div class="stat-card-l">Verified Drivers</div>
       </div>
-      <div class="stat-n" data-target="80" data-sfx="%">0%</div>
-      <div class="stat-l">Fewer Parent Calls</div>
-    </div>
-    <div class="stat-block reveal" style="transition-delay:.24s">
-      <div class="stat-icon" style="background:rgba(244,67,54,.1)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#F44336" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div class="stat-card reveal">
+        <div class="stat-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        </div>
+        <div class="stat-card-n" data-target="80"><span class="suf">%</span></div>
+        <div class="stat-card-l">Fewer Parent Calls</div>
       </div>
-      <div class="stat-n" data-target="0" data-sfx="">0</div>
-      <div class="stat-l">Incidents at Deployed Schools</div>
-    </div>
-    <div class="stat-block reveal" style="transition-delay:.32s">
-      <div class="stat-icon" style="background:rgba(33,150,243,.12)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <div class="stat-card reveal">
+        <div class="stat-card-icon" style="background:rgba(46,125,50,.08);border-color:rgba(46,125,50,.15)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="stat-card-n" data-target="0"></div>
+        <div class="stat-card-l">Incidents — All Time</div>
       </div>
-      <div class="stat-n" data-target="3" data-sfx="">0</div>
-      <div class="stat-l">Schools Operational</div>
     </div>
   </div>
 </section>
 
 <!-- LIVE MAP -->
-<section id="livemap" class="sec">
+<section id="map-section">
+  <div class="road-grid"></div>
   <div class="inner">
     <div class="section-header">
       <div>
-        <div class="sec-tag reveal">01 — Live Driver Map</div>
-        <h2 class="sec-title reveal" style="transition-delay:.1s">Every Driver,<br><span class="d">On The Map.</span></h2>
-        <p class="sec-body reveal" style="transition-delay:.15s">Watch all active drivers in real time. Parents see exactly where their children are, every moment of every journey.</p>
+        <div class="sec-tag reveal">01 — Live Marketplace Map</div>
+        <h2 class="sec-title reveal" style="transition-delay:.1s">
+          Every Driver,<br>
+          <span class="d">On The Map.</span>
+        </h2>
+        <p class="sec-body reveal" style="transition-delay:.15s">
+          Real-time positions for every active driver. Parents watch their child's ride move through the suburb, live.
+        </p>
       </div>
     </div>
 
-    <div class="map-container-wrap reveal sc" style="transition-delay:.2s">
-      <div class="live-map-card">
-        <div class="map-header">
-          <div class="map-h-dot"></div>
-          <div class="map-h-title">Live Driver Network — Gauteng</div>
-          <div class="map-h-live">Live</div>
+    <div class="map-wrapper reveal sc" style="transition-delay:.2s">
+      <div class="map-header">
+        <div class="map-h-dot"></div>
+        <div class="map-h-title">Live Driver Network — Gauteng</div>
+        <div class="map-h-live">Live</div>
+      </div>
+      <div id="leaflet-map"></div>
+      <div class="map-driver-list">
+        <div class="map-driver-card">
+          <div class="map-dc-top">
+            <div class="map-dc-avatar">TM</div>
+            <div class="map-dc-info">
+              <div class="map-dc-name">Thabo M.</div>
+              <div class="map-dc-route">Fourways — Midrand</div>
+            </div>
+          </div>
+          <div class="map-dc-status ok">On Route</div>
+          <div class="map-dc-eta">3m <span>ETA</span></div>
         </div>
-        <div id="leaflet-map"></div>
-        <div class="map-bus-list">
-          <div class="map-bus-card" id="mb-a">
-            <div class="map-bc-icon">
-              <svg viewBox="0 0 42 22" fill="none"><rect x="1" y="4" width="40" height="14" rx="7" fill="#FFC107"/><rect x="4" y="1" width="22" height="10" rx="5" fill="#FFC107"/><rect x="6" y="2" width="10" height="7" rx="2" fill="#E3F2FD" opacity=".8"/><circle cx="10" cy="18" r="3" fill="#333"/><circle cx="32" cy="18" r="3" fill="#333"/><rect x="32" y="5" width="6" height="5" rx="2" fill="#FFF9C4" opacity=".8"/></svg>
+        <div class="map-driver-card">
+          <div class="map-dc-top">
+            <div class="map-dc-avatar" style="background:linear-gradient(135deg,#2196F3,#0A2540)">AN</div>
+            <div class="map-dc-info">
+              <div class="map-dc-name">Amahle N.</div>
+              <div class="map-dc-route">Sandton — Centurion</div>
             </div>
-            <div class="map-bc-info">
-              <div class="map-bc-route">Thabo M. — Fourways Route</div>
-              <div class="map-bc-meta">Midrand Primary &bull; 14 students</div>
-            </div>
-            <div class="map-bc-eta">3m<span>ETA</span></div>
           </div>
-          <div class="map-bus-card" id="mb-b">
-            <div class="map-bc-icon">
-              <svg viewBox="0 0 42 22" fill="none"><rect x="1" y="4" width="40" height="14" rx="7" fill="#2196F3"/><rect x="4" y="1" width="22" height="10" rx="5" fill="#2196F3"/><rect x="6" y="2" width="10" height="7" rx="2" fill="#E3F2FD" opacity=".8"/><circle cx="10" cy="18" r="3" fill="#333"/><circle cx="32" cy="18" r="3" fill="#333"/><rect x="32" y="5" width="6" height="5" rx="2" fill="#FFF9C4" opacity=".8"/></svg>
+          <div class="map-dc-status ok">On Route</div>
+          <div class="map-dc-eta">8m <span>ETA</span></div>
+        </div>
+        <div class="map-driver-card">
+          <div class="map-dc-top">
+            <div class="map-dc-avatar" style="background:linear-gradient(135deg,#2E7D32,#0A2540)">LK</div>
+            <div class="map-dc-info">
+              <div class="map-dc-name">Lucky K.</div>
+              <div class="map-dc-route">Randburg — TNP</div>
             </div>
-            <div class="map-bc-info">
-              <div class="map-bc-route">Amahle N. — Sandton Route</div>
-              <div class="map-bc-meta">Centurion Academy &bull; 11 students</div>
-            </div>
-            <div class="map-bc-eta">8m<span>ETA</span></div>
           </div>
-          <div class="map-bus-card" id="mb-c">
-            <div class="map-bc-icon">
-              <svg viewBox="0 0 42 22" fill="none"><rect x="1" y="4" width="40" height="14" rx="7" fill="#2E7D32"/><rect x="4" y="1" width="22" height="10" rx="5" fill="#2E7D32"/><rect x="6" y="2" width="10" height="7" rx="2" fill="#E3F2FD" opacity=".8"/><circle cx="10" cy="18" r="3" fill="#333"/><circle cx="32" cy="18" r="3" fill="#333"/><rect x="32" y="5" width="6" height="5" rx="2" fill="#FFF9C4" opacity=".8"/></svg>
+          <div class="map-dc-status dly">Delayed +7m</div>
+          <div class="map-dc-eta">-- <span>Late</span></div>
+        </div>
+        <div class="map-driver-card">
+          <div class="map-dc-top">
+            <div class="map-dc-avatar" style="background:linear-gradient(135deg,#D32F2F,#0A2540)">SR</div>
+            <div class="map-dc-info">
+              <div class="map-dc-name">Sipho R.</div>
+              <div class="map-dc-route">N14 Route</div>
             </div>
-            <div class="map-bc-info">
-              <div class="map-bc-route">Lucky K. — Randburg Route</div>
-              <div class="map-bc-meta">Tshwane North Primary &bull; 9 students</div>
-            </div>
-            <div class="map-bc-eta dly">+7m<span>Delayed</span></div>
           </div>
-          <div class="map-bus-card" id="mb-d">
-            <div class="map-bc-icon">
-              <svg viewBox="0 0 42 22" fill="none"><rect x="1" y="4" width="40" height="14" rx="7" fill="#F44336"/><rect x="4" y="1" width="22" height="10" rx="5" fill="#F44336"/><rect x="6" y="2" width="10" height="7" rx="2" fill="#E3F2FD" opacity=".8"/><circle cx="10" cy="18" r="3" fill="#333"/><circle cx="32" cy="18" r="3" fill="#333"/><rect x="32" y="5" width="6" height="5" rx="2" fill="#FFF9C4" opacity=".8"/></svg>
+          <div class="map-dc-status sos">SOS Active</div>
+          <div class="map-dc-eta" style="color:var(--sos)">SOS <span>Alert</span></div>
+        </div>
+      </div>
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-dot grn"></div>On Route</div>
+        <div class="legend-item"><div class="legend-dot ylw"></div>Delayed</div>
+        <div class="legend-item"><div class="legend-dot red"></div>SOS Active</div>
+        <div class="legend-item"><div class="legend-dot blu"></div>GPS Position</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOS DEMO -->
+<section id="sos-demo">
+  <div class="inner">
+    <div class="sec-tag reveal sos-desc-tag" style="color:var(--sos)">02 — Emergency Response</div>
+    <h2 class="sec-title reveal" style="transition-delay:.1s">
+      One Tap.<br>
+      <span class="d" style="color:var(--sos)">Full Emergency Protocol.</span>
+    </h2>
+    <p class="sec-body reveal" style="transition-delay:.15s;max-width:580px">
+      When a driver triggers SOS, the system executes a cascading emergency protocol: live GPS broadcast, all contacts notified, emergency services called automatically.
+    </p>
+
+    <div class="sos-layout" style="margin-top:3rem">
+      <!-- Left: Phone with radar rings -->
+      <div class="sos-phone-wrap reveal l">
+        <div class="sos-radar">
+          <div class="sos-radar-ring"></div>
+          <div class="sos-radar-ring"></div>
+          <div class="sos-radar-ring"></div>
+        </div>
+        <div class="sos-phone">
+          <div class="sos-screen">
+            <div class="sos-notch"><div class="sos-notch-d"></div></div>
+            <div class="sos-phone-hdr">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#D32F2F" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span class="sos-hdr-label">Emergency Alert Active</span>
             </div>
-            <div class="map-bc-info">
-              <div class="map-bc-route"> Sipho R. — N14 Route</div>
-              <div class="map-bc-meta">Tshwane North Primary &bull; 6 students</div>
+            <div class="sos-phone-body">
+              <div style="text-align:center">
+                <div class="sos-ring-btn" id="sos-ring-btn">
+                  <div class="sos-btn-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  </div>
+                </div>
+                <p class="sos-hint">Tap to trigger SOS demo</p>
+              </div>
+              <div class="sos-info-box">
+                <div class="sos-info-title">Sipho R. — SOS Active</div>
+                <div class="sos-info-text">Location shared with school admin and all emergency contacts.</div>
+              </div>
+              <div class="sos-info-box ok">
+                <div class="sos-info-title">All Contacts Notified</div>
+                <div class="sos-info-text">School admin · 3 parents · Emergency services</div>
+              </div>
+              <div class="sos-contact-list">
+                <div class="sos-contact-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                  Nomsa Ferreira — Admin
+                  <span class="cr-status ok">Called</span>
+                </div>
+                <div class="sos-contact-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                  Lerato M. — Parent
+                  <span class="cr-status ok">Notified</span>
+                </div>
+                <div class="sos-contact-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                  SA Emergency — 10111
+                  <span class="cr-status ok">Connected</span>
+                </div>
+              </div>
             </div>
-            <div class="map-bc-eta sos">SOS<span>Active</span></div>
           </div>
         </div>
-        <div class="map-legend">
-          <div class="legend-item"><div class="legend-dot grn"></div>On Route</div>
-          <div class="legend-item"><div class="legend-dot ylw"></div>Delayed</div>
-          <div class="legend-item"><div class="legend-dot red"></div>SOS Active</div>
-          <div class="legend-item"><div class="legend-dot blu"></div>GPS Position</div>
+      </div>
+
+      <!-- Right: Steps -->
+      <div class="reveal r">
+        <div class="sos-steps">
+          <div class="sos-step">
+            <div class="sos-step-n">1</div>
+            <div class="sos-step-t"><strong>Driver presses SOS</strong> — prominently placed in the driver app. One touch triggers everything.</div>
+          </div>
+          <div class="sos-step">
+            <div class="sos-step-n">2</div>
+            <div class="sos-step-t"><strong>Live location broadcast</strong> — GPS coordinates sent to admin dashboard, all parents, and SA emergency services simultaneously.</div>
+          </div>
+          <div class="sos-step">
+            <div class="sos-step-n">3</div>
+            <div class="sos-step-t"><strong>Emergency services called</strong> — ScholarTrack auto-dials 10111 with GPS location and student manifest. No manual dialing needed.</div>
+          </div>
+          <div class="sos-step">
+            <div class="sos-step-n">4</div>
+            <div class="sos-step-t"><strong>Parents notified instantly</strong> — push notification and SMS to every parent whose child is on that trip.</div>
+          </div>
+        </div>
+
+        <div style="margin-top:2.5rem;padding:1.5rem;background:rgba(46,125,50,.06);border:1px solid rgba(46,125,50,.15);border-radius:12px">
+          <div style="font-family:var(--syne);font-size:.88rem;font-weight:700;color:var(--safe);margin-bottom:.4rem">Zero Incidents Since Launch</div>
+          <div style="font-family:var(--outfit);font-size:.82rem;color:var(--text2);line-height:1.6">Every safety feature has been tested in production. The system is live, proven, and operating R100k-grade reliability.</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- SCHOOL CARDS -->
-<section id="schools" class="sec">
+<!-- SCHOOLS -->
+<section id="schools">
+  <div class="road-grid"></div>
   <div class="inner">
-    <div class="sec-tag reveal">02 — Partner Schools</div>
-    <h2 class="sec-title reveal" style="transition-delay:.1s">Trusted By<br><span class="d">Real Schools.</span></h2>
-    <p class="sec-body reveal" style="margin-top:.8rem;transition-delay:.15s">ScholarTrack is fully operational at these schools. Every bus tracked. Every child accounted for.</p>
+    <div class="sec-tag reveal">03 — Partner Schools</div>
+    <h2 class="sec-title reveal" style="transition-delay:.1s">
+      Where Safety<br>
+      <span class="d">Goes Live.</span>
+    </h2>
+    <p class="sec-body reveal" style="margin-top:.8rem;transition-delay:.15s">
+      Three schools are fully operational. Every driver verified. Every child tracked from door to school and back.
+    </p>
 
     <div class="school-grid">
-      <!-- Midrand Primary -->
       <div class="school-card reveal" style="transition-delay:.1s">
         <div class="sch-card-head">
           <div class="sch-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
           <div class="sch-info">
             <div class="sch-name">Midrand Primary School</div>
             <div class="sch-loc">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
               Midrand, Gauteng
             </div>
           </div>
@@ -1046,16 +1134,15 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
         </div>
       </div>
 
-      <!-- Centurion Academy -->
       <div class="school-card reveal" style="transition-delay:.2s">
         <div class="sch-card-head">
-          <div class="sch-logo" style="background:var(--blue-lt)">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--blue)"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <div class="sch-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
           <div class="sch-info">
             <div class="sch-name">Centurion Academy</div>
             <div class="sch-loc">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
               Centurion, Gauteng
             </div>
           </div>
@@ -1070,16 +1157,15 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
         </div>
       </div>
 
-      <!-- Tshwane North Primary -->
       <div class="school-card reveal" style="transition-delay:.3s">
         <div class="sch-card-head">
-          <div class="sch-logo" style="background:var(--green-lt)">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--green)"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <div class="sch-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
           <div class="sch-info">
             <div class="sch-name">Tshwane North Primary</div>
             <div class="sch-loc">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
               Pretoria North, Gauteng
             </div>
           </div>
@@ -1097,200 +1183,15 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
   </div>
 </section>
 
-<!-- SOS DEMO -->
-<section id="sosdemo" class="sec">
-  <div class="inner">
-    <div class="sos-layout">
-      <!-- Left: Phone mockup -->
-      <div class="reveal l">
-        <div class="sos-phone">
-          <div class="sos-screen">
-            <div class="sos-notch"><div class="sos-notch-dot"></div></div>
-            <div class="sos-phone-hdr">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F44336" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <span class="sos-hdr-label">Emergency Alert Active</span>
-            </div>
-            <div class="sos-phone-body">
-              <div style="text-align:center">
-                <div class="sos-pulse-ring" id="sos-ring">
-                  <div class="sos-btn-center">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  </div>
-                </div>
-                <p class="sos-hint">Tap to trigger SOS alert</p>
-              </div>
-              <div class="sos-info-box">
-                <div class="sos-info-title">Sipho R. — SOS Active</div>
-                <div class="sos-info-text">Location shared with school admin and all emergency contacts. Police notified automatically.</div>
-              </div>
-              <div class="sos-info-box ok">
-                <div class="sos-info-title">All Contacts Notified</div>
-                <div class="sos-info-text">School admin · 3 parents · Emergency services</div>
-              </div>
-              <div class="sos-contact">
-                <div class="sos-contact-row">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                  Nomsa Ferreira — School Admin
-                  <span>Called</span>
-                </div>
-                <div class="sos-contact-row">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                  Lerato M. — Parent
-                  <span>Notified</span>
-                </div>
-                <div class="sos-contact-row">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                  SA Emergency — 10111
-                  <span style="color:var(--green)">Connected</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: Description -->
-      <div class="reveal r">
-        <div class="sec-tag sos-desc-tag">03 — Emergency SOS</div>
-        <h2 class="sos-title">One Button.<br><span>Total Peace of Mind.</span></h2>
-        <p class="sos-body">When a driver hits SOS, the system springs into immediate action. Live GPS broadcast to school admin, all parents, and SA emergency services — all within seconds.</p>
-        <div class="sos-steps">
-          <div class="sos-step">
-            <div class="sos-step-n">1</div>
-            <div class="sos-step-t"><strong>Driver presses SOS</strong> — prominently placed in the driver app for instant access in an emergency.</div>
-          </div>
-          <div class="sos-step">
-            <div class="sos-step-n">2</div>
-            <div class="sos-step-t"><strong>Live location broadcast</strong> — bus GPS sent to school admin dashboard and all emergency contacts simultaneously.</div>
-          </div>
-          <div class="sos-step">
-            <div class="sos-step-n">3</div>
-            <div class="sos-step-t"><strong>Emergency services called</strong> — ScholarTrack auto-calls 10111 with bus location and student manifest. No manual dialing.</div>
-          </div>
-          <div class="sos-step">
-            <div class="sos-step-n">4</div>
-            <div class="sos-step-t"><strong>Parents notified</strong> — immediate push notification and SMS to every parent of a child on that bus.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PARENT NOTIFICATION DEMO -->
-<section id="notifydemo" class="sec">
-  <div class="inner">
-    <div class="notify-layout">
-      <!-- Left: Description -->
-      <div class="reveal l">
-        <div class="sec-tag notify-tag green">04 — Parent Notifications</div>
-        <h2 class="notify-title">Your Child's Bus.<br><span>Always 5 Minutes Away.</span></h2>
-        <p class="notify-body-text">Parents receive automatic, context-aware notifications at every key moment — departure, en route, arrival. No app download. No phone calls. Just certainty.</p>
-        <div class="notify-types">
-          <div class="notify-type">
-            <div class="notify-type-icon grn">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            </div>
-            <div class="notify-type-text">
-              <strong>Driver Departed Alert</strong>
-              "Thabo M. has left Centurion Academy with 11 students. Live tracking is now active."
-            </div>
-          </div>
-          <div class="notify-type">
-            <div class="notify-type-icon blu">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            </div>
-            <div class="notify-type-text">
-              <strong>5 Minutes Away</strong>
-              "Thabo M. is 5 minutes from your stop on Kingfisher Road. Please have Lerato ready."
-            </div>
-          </div>
-          <div class="notify-type">
-            <div class="notify-type-icon ylw">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            </div>
-            <div class="notify-type-text">
-              <strong>Drop-off Confirmation</strong>
-              "Lerato has been dropped off safely at Oak Avenue stop. Thabo M. has departed."
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: Phone mockup -->
-      <div class="reveal r">
-        <div class="notify-phone">
-          <div class="notify-screen">
-            <div class="notify-ph">
-              <div class="notify-app-icon">
-                <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="5" width="14" height="7" rx="3.5" fill="#FFC107"/><rect x="3" y="2" width="8" height="5" rx="2.5" fill="#FFC107"/><circle cx="4" cy="12" r="1.5" fill="#333"/><circle cx="12" cy="12" r="1.5" fill="#333"/></svg>
-              </div>
-              <div class="notify-app-name">ScholarTrack</div>
-              <div class="notify-time">now</div>
-            </div>
-            <div class="notify-body">
-              <!-- Departed -->
-              <div class="notify-card" style="animation-delay:.0s">
-                <div class="notify-card-hdr ylw">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                  <span class="notify-card-from">ScholarTrack</span>
-                </div>
-                <div class="notify-card-body">
-                  <div class="notify-card-title">Thabo M. has departed</div>
-                  <div class="notify-card-msg">Fourways Route — 14 students on board. Live tracking is now active.</div>
-                </div>
-                <div class="notify-card-ftr">
-                  <span class="notify-card-time">7:14 AM</span>
-                  <span class="notify-tag y">On Time</span>
-                </div>
-              </div>
-              <!-- 5 min away -->
-              <div class="notify-card" style="animation-delay:.3s">
-                <div class="notify-card-hdr blu">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                  <span class="notify-card-from" style="color:var(--blue)">ScholarTrack</span>
-                </div>
-                <div class="notify-card-body">
-                  <div class="notify-card-title">5 minutes away</div>
-                  <div class="notify-card-msg">Thabo M. is approaching your stop on Kingfisher Road. Please have Lerato ready.</div>
-                </div>
-                <div class="notify-card-ftr">
-                  <span class="notify-card-time">7:31 AM</span>
-                  <span class="notify-tag b">Arriving</span>
-                </div>
-              </div>
-              <!-- Drop-off -->
-              <div class="notify-card" style="animation-delay:.6s">
-                <div class="notify-card-hdr grn">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                  <span class="notify-card-from" style="color:var(--green)">ScholarTrack</span>
-                </div>
-                <div class="notify-card-body">
-                  <div class="notify-card-title">Lerato dropped off safely</div>
-                  <div class="notify-card-msg">Thabo M. has departed the Oak Avenue stop. Have a great day at school!</div>
-                </div>
-                <div class="notify-card-ftr">
-                  <span class="notify-card-time">7:38 AM</span>
-                  <span class="notify-tag">Confirmed</span>
-                </div>
-              </div>
-              <div class="notify-cta">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 000 20 14.5 14.5 0 000-20"/><path d="M2 12h20"/></svg>
-                Open Live Tracker
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- TESTIMONIALS -->
-<section id="testimonials" class="sec">
+<section id="testimonials">
   <div class="inner">
-    <div class="sec-tag reveal">05 — Testimonials</div>
-    <h2 class="sec-title reveal" style="transition-delay:.1s">What Schools<br><span class="d">Say About Us.</span></h2>
+    <div class="sec-tag reveal">04 — Voices</div>
+    <h2 class="sec-title reveal" style="transition-delay:.1s">
+      Trusted By<br>
+      <span class="d">Those Who Matter.</span>
+    </h2>
+
     <div class="testi-grid">
       <div class="testi-card reveal" style="transition-delay:.1s">
         <div class="testi-q">"</div>
@@ -1301,18 +1202,17 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
-        <p class="testi-text">"ScholarTrack transformed how we manage school transport. Parents stopped calling to check where the bus was. The SOS feature gives everyone peace of mind."</p>
+        <p class="testi-text">ScholarTrack changed how we manage school transport. Parents stopped calling to check where the bus was. The SOS feature gives everyone real peace of mind — not just words.</p>
         <div class="testi-author">
-          <div class="testi-avatar" style="background:var(--amber-lt);color:var(--amber-dk)">NF</div>
+          <div class="testi-avatar" style="background:rgba(212,175,55,.15);color:var(--gold)">NF</div>
           <div>
             <span class="testi-name">Nomsa Ferreira</span>
             <span class="testi-role">Principal, Midrand Primary School</span>
           </div>
         </div>
-        <div class="testi-school">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-          Midrand Primary School
-        </div>
+        <button class="testi-play" aria-label="Play testimonial">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
       </div>
 
       <div class="testi-card reveal" style="transition-delay:.2s">
@@ -1324,18 +1224,17 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
-        <p class="testi-text">"Before ScholarTrack, our admin team spent 40 minutes every morning fielding calls from parents. Now we spend zero. The dashboard shows us everything."</p>
+        <p class="testi-text">I earn R4,200 a month driving my own car for ScholarTrack families. The platform handles everything — I just focus on getting the kids to school safely.</p>
         <div class="testi-author">
-          <div class="testi-avatar" style="background:var(--blue-lt);color:var(--blue)">TN</div>
+          <div class="testi-avatar" style="background:rgba(46,125,50,.15);color:var(--safe)">TM</div>
           <div>
-            <span class="testi-name">Thandi Nkosi</span>
-            <span class="testi-role">Transport Coordinator, Centurion Academy</span>
+            <span class="testi-name">Thabo Mkhize</span>
+            <span class="testi-role">Verified Driver, Midrand</span>
           </div>
         </div>
-        <div class="testi-school">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-          Centurion Academy
-        </div>
+        <button class="testi-play" aria-label="Play testimonial">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
       </div>
 
       <div class="testi-card reveal" style="transition-delay:.3s">
@@ -1347,52 +1246,61 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
-        <p class="testi-text">"We had a bus break down on the N14 last term. Driver hit SOS and I had the location, the student manifest, and parents notified — within 60 seconds."</p>
+        <p class="testi-text">I used to call the school every morning. Now I open the app and watch Lerato's driver move through Fourways in real time. R1,800 per month for the whole family.</p>
         <div class="testi-author">
-          <div class="testi-avatar" style="background:var(--green-lt);color:var(--green)">SM</div>
+          <div class="testi-avatar" style="background:rgba(33,150,243,.12);color:#2196F3">LM</div>
           <div>
-            <span class="testi-name">Solomon Mokoena</span>
-            <span class="testi-role">Principal, Tshwane North Primary</span>
+            <span class="testi-name">Lerato Mosele</span>
+            <span class="testi-role">Parent, Fourways</span>
           </div>
         </div>
-        <div class="testi-school">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-          Tshwane North Primary
-        </div>
+        <button class="testi-play" aria-label="Play testimonial">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
       </div>
     </div>
   </div>
 </section>
 
 <!-- CTA -->
-<section id="cta" class="sec">
+<section id="cta">
   <div class="cta-glow"></div>
   <div class="inner">
     <div class="cta-inner">
-      <h2 class="cta-title reveal">Know Where<br>Your <span class="a">Children Are.</span><br>Always.</h2>
-      <p class="cta-sub reveal" style="transition-delay:.15s">Request a free demo for your school. We'll show you the live tracking dashboard, the SOS system, and have your routes configured in 48 hours.</p>
-      <div class="cta-actions reveal" style="transition-delay:.25s">
-        <a href="mailto:kgothatso@makena.studio" class="cta-pri">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          Request a Demo
+      <div class="cta-tag reveal">// Join the Marketplace</div>
+      <h2 class="cta-title reveal" style="transition-delay:.1s">
+        Safety Deserves<br>
+        <span class="g">R100k Quality.</span>
+      </h2>
+      <p class="cta-body reveal" style="transition-delay:.15s">
+        Whether you're a parent looking for a verified driver, or a driver with a car wanting to earn — ScholarTrack is the platform that takes child safety seriously.
+      </p>
+      <div class="cta-actions reveal" style="transition-delay:.2s">
+        <a href="#cta" class="btn-cta-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          I'm a Parent — Find Drivers
         </a>
-        <a href="https://wa.me/27651234567" target="_blank" class="cta-sec">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          WhatsApp Us
+        <a href="#cta" class="btn-cta-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="22" height="12" rx="3"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          I'm a Driver — Start Earning
         </a>
       </div>
-      <div class="contact-strip reveal" style="transition-delay:.35s">
-        <div class="contact-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          kgothatso@makena.studio
+      <div class="cta-trust reveal" style="transition-delay:.25s">
+        <div class="cta-trust-item">
+          <div class="cta-trust-n">209</div>
+          <div class="cta-trust-l">Students</div>
         </div>
-        <div class="contact-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          Pretoria, South Africa
+        <div class="cta-trust-item">
+          <div class="cta-trust-n">11</div>
+          <div class="cta-trust-l">Drivers</div>
         </div>
-        <div class="contact-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          Demo ready in 48 hours
+        <div class="cta-trust-item">
+          <div class="cta-trust-n">3</div>
+          <div class="cta-trust-l">Schools</div>
+        </div>
+        <div class="cta-trust-item">
+          <div class="cta-trust-n">0</div>
+          <div class="cta-trust-l">Incidents</div>
         </div>
       </div>
     </div>
@@ -1401,188 +1309,423 @@ footer { background: #0d1018; border-top: 1px solid rgba(255,255,255,.05); }
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-main">
-    <div>
-      <div class="foot-brand">
-        <div class="nav-bus-icon" style="transform:scale(0.8);transform-origin:left center">
-          <div class="bw bw-l" style="bottom:-3px;left:3px;width:5px;height:5px"></div>
-          <div class="bw bw-r" style="bottom:-3px;right:3px;width:5px;height:5px"></div>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" stroke="#D4AF37" stroke-width="1.5"/><path d="M8 16c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#D4AF37" stroke-width="1.5"/><circle cx="16" cy="16" r="3" fill="#D4AF37"/><path d="M16 19v5" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/><path d="M8 24h16" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/></svg>
+          ScholarTrack
         </div>
-        ScholarTrack
+        <p class="footer-tagline">Every Child, Accounted For. A two-sided marketplace for verified school transport drivers in South Africa.</p>
       </div>
-      <p class="foot-tag">Real-time school transport safety for South African schools. Built by Makena Automation Studios, Pretoria.</p>
+      <div>
+        <div class="footer-col-title">Platform</div>
+        <div class="footer-links">
+          <a href="#map-section">Live Map</a>
+          <a href="#sos-demo">SOS Demo</a>
+          <a href="#schools">Schools</a>
+          <a href="#testimonials">Testimonials</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Drivers</div>
+        <div class="footer-links">
+          <a href="#cta">Apply to Drive</a>
+          <a href="#cta">Driver App</a>
+          <a href="#cta">Compliance Docs</a>
+          <a href="#cta">Earnings</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <div class="footer-links">
+          <a href="#cta">Privacy Policy</a>
+          <a href="#cta">Terms of Service</a>
+          <a href="#cta">POPIA Compliance</a>
+          <a href="#cta">Contact</a>
+        </div>
+      </div>
     </div>
-    <div>
-      <div class="foot-col-title">Product</div>
-      <ul class="foot-links">
-        <li><a href="#livemap">Live Map</a></li>
-        <li><a href="#schools">Schools</a></li>
-        <li><a href="#sosdemo">SOS Demo</a></li>
-        <li><a href="#testimonials">Testimonials</a></li>
-        <li><a href="https://github.com/Kgothatso012/ScholarTrack" target="_blank">GitHub</a></li>
-      </ul>
+    <div class="footer-bottom">
+      <div class="footer-copy">&copy; 2026 ScholarTrack (Pty) Ltd. All rights reserved. Johannesburg, South Africa.</div>
+      <div class="footer-legal">
+        <a href="#cta">Privacy</a>
+        <a href="#cta">Terms</a>
+        <a href="#cta">POPIA</a>
+      </div>
     </div>
-    <div>
-      <div class="foot-col-title">Company</div>
-      <ul class="foot-links">
-        <li><a href="https://kgothatso012.github.io/makena-automation-website/">Makena Studios</a></li>
-        <li><a href="#cta">Contact</a></li>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms of Service</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <div class="foot-legal">© 2025 Makena Automation Studios · ScholarTrack is a product of Makena Automation Studios</div>
-    <div class="foot-live">All Systems Operational</div>
   </div>
 </footer>
 
-<!-- ══ SCRIPTS ════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT — THREE.JS HERO + GSAP + LEAFLET + TOGGLE
+═══════════════════════════════════════════════════════ -->
 <script>
-/* ── LOADER ─────────────────────────────────────────── */
-(function() {
-  const lbar = document.getElementById('lbar');
-  const lpct = document.getElementById('lpct');
-  const loader = document.getElementById('loader');
-  let pct = 0;
-  const iv = setInterval(() => {
-    pct = Math.min(pct + Math.random() * 18, 100);
-    lbar.style.width = pct + '%';
-    lpct.textContent = Math.floor(pct) + '%';
-    if (pct >= 100) {
-      clearInterval(iv);
-      setTimeout(() => {
-        loader.style.opacity = '0';
-        setTimeout(() => loader.remove(), 600);
-        initApp();
-      }, 200);
-    }
-  }, 75);
+/* ─────────────────────────────────────────────────────
+   THREE.JS SCENE — Stylized 3D bus on curved road
+───────────────────────────────────────────────────── */
+(function initThree() {
+  const canvas = document.getElementById('three-canvas');
+  if (!canvas || !window.THREE) return;
+
+  // Mobile: skip 3D, show static gradient instead
+  if (window.innerWidth < 768) {
+    canvas.style.cssText = 'position:absolute;top:0;right:0;width:100%;height:50vh;background:radial-gradient(ellipse 80% 80% at 70% 50%,rgba(13,47,85,0.8) 0%,#060d18 60%)';
+    return;
+  }
+
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.setClearColor(0x000000, 0);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 200);
+  camera.position.set(6, 4, 8);
+  camera.lookAt(0, 0.5, 0);
+
+  // Lighting
+  const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+  scene.add(ambient);
+  const sun = new THREE.DirectionalLight(0xfff4e0, 1.4);
+  sun.position.set(5, 10, 5);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  scene.add(sun);
+  const fillLight = new THREE.PointLight(0x2196F3, 0.6, 20);
+  fillLight.position.set(-4, 3, -2);
+  scene.add(fillLight);
+  const goldLight = new THREE.PointLight(0xD4AF37, 0.4, 15);
+  goldLight.position.set(2, 1, 4);
+  scene.add(goldLight);
+
+  /* ── Road: curved path via CatmullRomCurve3 ── */
+  const roadCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-12, 0, 4),
+    new THREE.Vector3(-6, 0, 2),
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(6, 0, -2),
+    new THREE.Vector3(12, 0, -1),
+  ]);
+  const roadGeo = new THREE.TubeGeometry(roadCurve, 80, 0.28, 8, false);
+  const roadMat = new THREE.MeshStandardMaterial({ color: 0x1a2535, roughness: 0.9 });
+  const road = new THREE.Mesh(roadGeo, roadMat);
+  road.receiveShadow = true;
+  scene.add(road);
+
+  // Road center line (dashed yellow)
+  const linePoints = roadCurve.getPoints(100);
+  const lineGeo = new THREE.BufferGeometry().setFromPoints(
+    linePoints.map((p, i) => i % 5 < 3 ? p : null).filter(Boolean)
+  );
+  const lineMat = new THREE.LineDashedMaterial({ color: 0xD4AF37, dashSize: 0.3, gapSize: 0.2 });
+  const centerLine = new THREE.Line(lineGeo, lineMat);
+  centerLine.computeLineDistances();
+  centerLine.position.y = 0.285;
+  scene.add(centerLine);
+
+  /* ── Bus body ── */
+  const busGroup = new THREE.Group();
+  const bodyGeo = new THREE.BoxGeometry(2.4, 1.2, 1.0);
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xD4AF37, roughness: 0.3, metalness: 0.7 });
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.position.y = 0.9;
+  body.castShadow = true;
+  busGroup.add(body);
+
+  const cabinGeo = new THREE.BoxGeometry(1.2, 0.7, 0.9);
+  const cabin = new THREE.Mesh(cabinGeo, bodyMat);
+  cabin.position.set(-0.5, 1.65, 0);
+  cabin.castShadow = true;
+  busGroup.add(cabin);
+
+  // Windshield
+  const windGeo = new THREE.BoxGeometry(0.05, 0.5, 0.7);
+  const windMat = new THREE.MeshStandardMaterial({ color: 0x2196F3, transparent: true, opacity: 0.6, roughness: 0.1 });
+  const windshield = new THREE.Mesh(windGeo, windMat);
+  windshield.position.set(0.6, 1.6, 0);
+  busGroup.add(windshield);
+
+  // ScholarTrack logo panel on side
+  const logoGeo = new THREE.PlaneGeometry(0.9, 0.3);
+  const logoMat = new THREE.MeshStandardMaterial({ color: 0x0A2540, roughness: 0.5 });
+  const logoPanel = new THREE.Mesh(logoGeo, logoMat);
+  logoPanel.position.set(0, 0.95, 0.505);
+  busGroup.add(logoPanel);
+
+  // Wheels (cylinders)
+  const wheelGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.15, 12);
+  const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+  const wheelPositions = [[0.8, 0.28, 0.52], [0.8, 0.28, -0.52], [-0.8, 0.28, 0.52], [-0.8, 0.28, -0.52]];
+  const wheels = [];
+  wheelPositions.forEach(pos => {
+    const w = new THREE.Mesh(wheelGeo, wheelMat);
+    w.rotation.x = Math.PI / 2;
+    w.position.set(...pos);
+    w.castShadow = true;
+    wheels.push(w);
+    busGroup.add(w);
+  });
+
+  // Headlight glow
+  const headGeo = new THREE.BoxGeometry(0.06, 0.2, 0.3);
+  const headMat = new THREE.MeshStandardMaterial({ color: 0xFFF9C4, emissive: 0xFFF9C4, emissiveIntensity: 0.8 });
+  const headlight = new THREE.Mesh(headGeo, headMat);
+  headlight.position.set(1.22, 0.85, 0);
+  busGroup.add(headlight);
+
+  // Tail light
+  const tailMat = new THREE.MeshStandardMaterial({ color: 0xD32F2F, emissive: 0xD32F2F, emissiveIntensity: 0.5 });
+  const tailGeo = new THREE.BoxGeometry(0.06, 0.15, 0.25);
+  const taillight = new THREE.Mesh(tailGeo, tailMat);
+  taillight.position.set(-1.22, 0.85, 0);
+  busGroup.add(taillight);
+
+  scene.add(busGroup);
+
+  /* ── Jacaranda trees (instanced purple cones) ── */
+  const treeCount = 22;
+  const trunkGeo = new THREE.CylinderGeometry(0.04, 0.06, 0.6, 6);
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3728, roughness: 0.9 });
+  const crownGeo = new THREE.SphereGeometry(0.4, 6, 5);
+  const crownMat = new THREE.MeshStandardMaterial({ color: 0x7B2D8B, roughness: 0.8 });
+
+  for (let i = 0; i < treeCount; i++) {
+    const side = i % 2 === 0 ? -1 : 1;
+    const x = (Math.random() - 0.5) * 20;
+    const z = -6 + Math.random() * 14;
+    const h = 0.8 + Math.random() * 0.5;
+    const tree = new THREE.Group();
+    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    trunk.position.y = 0.3;
+    const crown = new THREE.Mesh(crownGeo, crownMat);
+    crown.position.y = h;
+    tree.add(trunk, crown);
+    tree.position.set(x * side * 3 + side * 3, 0, z);
+    scene.add(tree);
+  }
+
+  /* ── School buildings in distance ── */
+  const schoolPositions = [
+    { x: 8, z: -8, color: 0xC62828 },
+    { x: -7, z: -10, color: 0x2E7D32 },
+    { x: 0, z: -14, color: 0x1565C0 },
+  ];
+  schoolPositions.forEach(s => {
+    const buildingGeo = new THREE.BoxGeometry(1.2, 1.5, 1.2);
+    const buildingMat = new THREE.MeshStandardMaterial({ color: s.color, roughness: 0.7 });
+    const building = new THREE.Mesh(buildingGeo, buildingMat);
+    building.position.set(s.x, 0.75, s.z);
+    building.castShadow = true;
+    scene.add(building);
+    const roofGeo = new THREE.ConeGeometry(1.0, 0.8, 4);
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x8B0000, roughness: 0.8 });
+    const roof = new THREE.Mesh(roofGeo, roofMat);
+    roof.position.set(s.x, 2.2, s.z);
+    roof.rotation.y = Math.PI / 4;
+    scene.add(roof);
+  });
+
+  /* ── GPS pins floating up ── */
+  const pinGeo = new THREE.SphereGeometry(0.08, 8, 8);
+  const pins = [];
+  const pinColors = [0x2196F3, 0x2E7D32, 0xD4AF37];
+  for (let i = 0; i < 3; i++) {
+    const pMat = new THREE.MeshStandardMaterial({ color: pinColors[i], emissive: pinColors[i], emissiveIntensity: 0.5 });
+    const p = new THREE.Mesh(pinGeo, pMat);
+    p.userData.baseY = 2.0 + i * 0.4;
+    p.userData.phase = i * 1.2;
+    pins.push(p);
+    scene.add(p);
+  }
+
+  /* ── Radar pulse rings ── */
+  const radarRings = [];
+  for (let i = 0; i < 3; i++) {
+    const rGeo = new THREE.RingGeometry(0.3, 0.35, 32);
+    const rMat = new THREE.MeshBasicMaterial({ color: 0x2196F3, transparent: true, opacity: 0, side: THREE.DoubleSide });
+    const r = new THREE.Mesh(rGeo, rMat);
+    r.rotation.x = -Math.PI / 2;
+    r.position.y = 0.05;
+    r.userData.phase = i * 0.8;
+    radarRings.push(r);
+    scene.add(r);
+  }
+
+  /* ── Animate ── */
+  let t = 0;
+  let mouseX = 0, mouseY = 0;
+  const targetCamX = 6, targetCamY = 4;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    t += 0.012;
+
+    // Bus along curve
+    const pt = roadCurve.getPoint((t * 0.08) % 1);
+    busGroup.position.x = pt.x;
+    busGroup.position.y = pt.y + 0.3 + Math.sin(t * 3) * 0.04;
+    busGroup.position.z = pt.z;
+    const tangent = roadCurve.getTangent((t * 0.08) % 1);
+    busGroup.rotation.y = Math.atan2(tangent.x, tangent.z);
+
+    // Wheel spin
+    wheels.forEach(w => { w.rotation.y += 0.15; });
+
+    // Bus hover/suspension
+    busGroup.position.y += Math.sin(t * 2) * 0.03;
+
+    // GPS pins float
+    pins.forEach((p, i) => {
+      p.position.set(
+        pt.x + Math.sin(t * 0.8 + i) * 1.2,
+        p.userData.baseY + Math.sin(t + p.userData.phase) * 0.3,
+        pt.z + Math.cos(t * 0.8 + i) * 1.2
+      );
+    });
+
+    // Radar rings expand and fade
+    radarRings.forEach((ring, i) => {
+      const phase = ((t * 0.6 + ring.userData.phase) % 2.5) / 2.5;
+      const scale = 0.5 + phase * 4;
+      ring.scale.set(scale, scale, 1);
+      ring.material.opacity = (1 - phase) * 0.3;
+      ring.position.x = pt.x;
+      ring.position.z = pt.z;
+    });
+
+    // Subtle camera orbit
+    const orbitX = Math.sin(t * 0.15) * 1.2;
+    const orbitY = Math.cos(t * 0.12) * 0.5;
+    camera.position.x = targetCamX + orbitX;
+    camera.position.y = Math.max(3, targetCamY + orbitY);
+    camera.lookAt(pt.x, 1.2, pt.z);
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  // Resize handler
+  window.addEventListener('resize', () => {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
 })();
 
-/* ── NAV SCROLL ─────────────────────────────────────── */
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 60);
+/* ─────────────────────────────────────────────────────
+   PARENT / DRIVER TOGGLE
+───────────────────────────────────────────────────── */
+const toggle = document.getElementById('role-toggle');
+const roleBtns = toggle?.querySelectorAll('.role-btn');
+const parentActions = document.querySelectorAll('.parent-action');
+const driverActions = document.querySelectorAll('.driver-action');
+
+roleBtns?.forEach(btn => {
+  btn.addEventListener('click', () => {
+    roleBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const role = btn.dataset.role;
+    if (role === 'driver') {
+      parentActions.forEach(el => el.style.display = 'none');
+      driverActions.forEach(el => el.style.display = '');
+    } else {
+      driverActions.forEach(el => el.style.display = 'none');
+      parentActions.forEach(el => el.style.display = '');
+    }
+  });
 });
 
-/* ── COUNTER EASING ─────────────────────────────────── */
-function easeCounter(el, target, dur) {
-  const s = performance.now();
-  function u(now) {
-    const p = Math.min((now - s) / dur, 1);
-    const e = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(e * target);
-    if (p < 1) requestAnimationFrame(u);
-    else el.textContent = target;
-  }
-  requestAnimationFrame(u);
-}
+/* ─────────────────────────────────────────────────────
+   GSAP SCROLL ANIMATIONS
+───────────────────────────────────────────────────── */
+function initGSAP() {
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
-/* ── SOS CLICK ──────────────────────────────────────── */
-function initSOS() {
-  const ring = document.getElementById('sos-ring');
-  if (!ring) return;
-  ring.addEventListener('click', () => {
-    ring.style.animation = 'none';
-    ring.offsetHeight;
-    ring.style.animation = 'sosRingPulse .4s ease-out';
-    setTimeout(() => { ring.style.animation = 'sosRingPulse 1.4s ease-out infinite'; }, 500);
-  });
-}
-
-/* ── INIT APP ────────────────────────────────────────── */
-function initApp() {
   gsap.registerPlugin(ScrollTrigger);
 
-  /* Hero counters */
-  easeCounter(document.getElementById('hc-students'), 247, 1800);
-  easeCounter(document.getElementById('hc-buses'), 12, 1400);
-  easeCounter(document.getElementById('hc-schools'), 3, 1000);
-
-  /* Bus count flicker */
-  setInterval(() => {
-    const el = document.getElementById('hc-buses');
-    if (el) el.textContent = Math.floor(Math.random() * 3) + 11;
-  }, 3500);
-
-  /* Scroll reveal */
-  document.querySelectorAll('.reveal').forEach(el => {
-    const delay = parseFloat(el.style.transitionDelay || '0');
-    const from = el.classList.contains('l') ? {x:-28,y:0}
-               : el.classList.contains('r') ? {x:28,y:0}
-               : el.classList.contains('sc') ? {scale:.94,y:20}
-               : {y:28,x:0};
-    gsap.fromTo(el,
-      { opacity: 0, ...from },
-      {
-        opacity: 1, x: 0, y: 0, scale: 1,
-        duration: .85, ease: 'power3.out', delay,
-        scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' }
-      }
-    );
-  });
-
-  /* Stats count-up */
-  document.querySelectorAll('.stat-n[data-target]').forEach(el => {
-    const tgt = parseInt(el.dataset.target);
-    const sfx = el.dataset.sfx || '';
-    ScrollTrigger.create({
-      trigger: el, start: 'top 80%', once: true,
-      onEnter: () => {
-        const o = { v: 0 };
-        gsap.to(o, {
-          v: tgt, duration: 1.8, ease: 'power2.out',
-          onUpdate() { el.textContent = Math.round(o.v) + sfx; }
-        });
+  // Reveal all .reveal elements
+  gsap.utils.toArray('.reveal').forEach(el => {
+    gsap.to(el, {
+      opacity: 1, y: 0, duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 88%',
+        toggleActions: 'play none none none'
       }
     });
   });
 
-  initSOS();
-  initMap();
-}
-
-/* ── LEAFLET MAP ─────────────────────────────────────── */
-function initMap() {
-  // Gauteng area — centered around Midrand/Pretoria
-  const map = L.map('leaflet-map', {
-    zoomControl: false,
-    attributionControl: false,
-    scrollWheelZoom: false
+  // Stats counters
+  gsap.utils.toArray('.stat-card-n[data-target]').forEach(el => {
+    const target = parseInt(el.dataset.target, 10);
+    const suffix = el.querySelector('.suf')?.textContent || '';
+    gsap.to(el, {
+      innerText: target,
+      duration: 2.2,
+      ease: 'power2.out',
+      snap: { innerText: 1 },
+      scrollTrigger: { trigger: el, start: 'top 85%' },
+      onUpdate: function() {
+        el.innerText = Math.round(parseFloat(el.innerText)) + suffix;
+      }
+    });
   });
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18
-  }).addTo(map);
 
-  // Custom map style — muted colors
-  map.getContainer().style.filter = 'saturate(0.6) brightness(1.05)';
+  // Nav scroll state
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('nav');
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // School card tilt on mouse
+  gsap.utils.toArray('.school-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      gsap.to(card, {
+        rotateY: x * 6, rotateX: -y * 4, duration: 0.4,
+        ease: 'power2.out', transformPerspective: 800
+      });
+    });
+    card.addEventListener('mouseleave', () => {
+      gsap.to(card, { rotateY: 0, rotateX: 0, duration: 0.6, ease: 'power2.out' });
+    });
+  });
+}
+initGSAP();
+
+/* ─────────────────────────────────────────────────────
+   LEAFLET MAP
+───────────────────────────────────────────────────── */
+(function initMap() {
+  if (typeof L === 'undefined') return;
+  const map = L.map('leaflet-map', {
+    zoomControl: false, attributionControl: false, scrollWheelZoom: false
+  });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  map.getContainer().style.filter = 'saturate(0.6) brightness(1.08)';
   map.setView([-25.95, 28.12], 11);
 
-  // Add zoom control at bottom right
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-  /* Route paths (LineStrings approximated) */
   const routes = [
-    // Thabo M. — Fourways to Midrand Primary
-    L.polyline([[-25.97, 27.99], [-25.96, 28.01], [-25.955, 28.04], [-25.953, 28.07], [-25.95, 28.10], [-25.948, 28.13]], { color: '#FFC107', weight: 3, opacity: 0.6 }),
-    // Amahle N. — Sandton to Centurion
+    L.polyline([[-25.97, 27.99], [-25.96, 28.01], [-25.955, 28.04], [-25.953, 28.07], [-25.95, 28.10], [-25.948, 28.13]], { color: '#D4AF37', weight: 3, opacity: 0.6 }),
     L.polyline([[-26.02, 27.99], [-26.0, 28.05], [-25.97, 28.09], [-25.94, 28.13], [-25.91, 28.17]], { color: '#2196F3', weight: 3, opacity: 0.6 }),
-    // Lucky K. — Randburg to Tshwane North
     L.polyline([[-26.05, 27.97], [-26.02, 28.01], [-25.99, 28.05], [-25.97, 28.09], [-25.95, 28.12]], { color: '#2E7D32', weight: 3, opacity: 0.6 }),
-    // Sipho R. — N14 Emergency route
-    L.polyline([[-25.93, 28.08], [-25.91, 28.11], [-25.89, 28.14], [-25.87, 28.17]], { color: '#F44336', weight: 3, opacity: 0.7, dashArray: '6,4' }),
+    L.polyline([[-25.93, 28.08], [-25.91, 28.11], [-25.89, 28.14], [-25.87, 28.17]], { color: '#D32F2F', weight: 3, opacity: 0.7, dashArray: '6,4' }),
   ];
   routes.forEach(r => r.addTo(map));
 
-  /* School markers */
   const schools = [
-    { lat: -25.95, lng: 28.13, name: 'Midrand Primary', abbr: 'MP', color: '#FFC107' },
+    { lat: -25.95, lng: 28.13, name: 'Midrand Primary', abbr: 'MP', color: '#D4AF37' },
     { lat: -25.91, lng: 28.17, name: 'Centurion Academy', abbr: 'CA', color: '#2196F3' },
     { lat: -25.95, lng: 28.12, name: 'Tshwane North Primary', abbr: 'TNP', color: '#2E7D32' },
   ];
-
   schools.forEach(s => {
     const icon = L.divIcon({
       className: '',
@@ -1592,114 +1735,97 @@ function initMap() {
         </div>
         <div style="font-family:'DM Mono',monospace;font-size:9px;color:#666;margin-top:3px;background:white;padding:1px 4px;border-radius:2px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.1)">${s.name}</div>
       </div>`,
-      iconSize: [80, 50],
-      iconAnchor: [16, 40]
+      iconSize: [80, 50], iconAnchor: [16, 40]
     });
     L.marker([s.lat, s.lng], { icon }).addTo(map);
   });
 
-  /* Animated bus markers */
-  const busDefs = [
-    { id: 'a', lat: -25.955, lng: 28.04, color: '#FFC107', route: 0, speed: 0.00025 },
-    { id: 'b', lat: -26.00, lng: 28.05, color: '#2196F3', route: 1, speed: 0.00022 },
-    { id: 'c', lat: -25.99, lng: 28.05, color: '#2E7D32', route: 2, speed: 0.0002 },
-    { id: 'd', lat: -25.91, lng: 28.11, color: '#F44336', route: 3, speed: 0.00018, sos: true },
+  const drivers = [
+    { lat: -25.955, lng: 28.04, color: '#D4AF37', id: 'a' },
+    { lat: -26.00, lng: 28.05, color: '#2196F3', id: 'b' },
+    { lat: -25.99, lng: 28.05, color: '#2E7D32', id: 'c' },
+    { lat: -25.91, lng: 28.11, color: '#D32F2F', id: 'd', sos: true },
   ];
 
-  const busMarkers = [];
+  const waypoints = [
+    [[-25.97, 27.99], [-25.96, 28.01], [-25.955, 28.04], [-25.953, 28.07], [-25.95, 28.10], [-25.948, 28.13]],
+    [[-26.02, 27.99], [-26.0, 28.05], [-25.97, 28.09], [-25.94, 28.13], [-25.91, 28.17]],
+    [[-26.05, 27.97], [-26.02, 28.01], [-25.99, 28.05], [-25.97, 28.09], [-25.95, 28.12]],
+    [[-25.93, 28.08], [-25.91, 28.11], [-25.89, 28.14], [-25.87, 28.17]],
+  ];
+  const speeds = [0.00025, 0.00022, 0.0002, 0.00018];
+  const offsets = [0, 0.3, 0.6, 0.15];
 
-  busDefs.forEach(b => {
-    // GPS pulse rings (CSS only via divIcon)
+  drivers.forEach((d, i) => {
     const pulseIcon = L.divIcon({
       className: '',
       html: `<div style="position:relative;width:60px;height:60px;transform:translate(-22px,-22px)">
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;border:2px solid ${b.color};opacity:.6;animation:gpsP 2s ease-out infinite;pointer-events:none"></div>
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;border:1.5px solid ${b.color};opacity:.4;animation:gpsP 2s ease-out infinite .45s;pointer-events:none"></div>
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:${b.color};box-shadow:0 0 6px ${b.color}"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;border:2px solid ${d.color};opacity:.5;animation:gpsPulse 2s ease-out infinite;pointer-events:none"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;border:1.5px solid ${d.color};opacity:.3;animation:gpsPulse 2s ease-out infinite .45s;pointer-events:none"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:${d.color};box-shadow:0 0 6px ${d.color}"></div>
       </div>`,
-      iconSize: [60, 60],
-      iconAnchor: [30, 30]
+      iconSize: [60, 60], iconAnchor: [30, 30]
     });
 
-    // Driver car SVG marker
-    const busColor = b.color;
-    const busSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="22" viewBox="0 0 42 22">
-      <rect x="1" y="4" width="40" height="14" rx="7" fill="${busColor}"/>
-      <rect x="4" y="1" width="22" height="10" rx="5" fill="${busColor}"/>
+    const carSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="22" viewBox="0 0 42 22">
+      <rect x="1" y="4" width="40" height="14" rx="7" fill="${d.color}"/>
+      <rect x="4" y="1" width="22" height="10" rx="5" fill="${d.color}"/>
       <rect x="6" y="2" width="10" height="7" rx="2" fill="#E3F2FD" opacity=".8"/>
-      <circle cx="10" cy="18" r="3" fill="#222"/>
-      <circle cx="32" cy="18" r="3" fill="#222"/>
+      <circle cx="10" cy="18" r="3" fill="#111"/>
+      <circle cx="32" cy="18" r="3" fill="#111"/>
       <rect x="32" y="5" width="6" height="5" rx="2" fill="#FFF9C4" opacity=".8"/>
     </svg>`;
+    const icon = L.divIcon({ className: '', html: carSvg, iconSize: [42, 22], iconAnchor: [21, 11] });
 
-    const busIcon = L.divIcon({
-      className: '',
-      html: `<div style="position:relative;filter:drop-shadow(0 3px 6px rgba(0,0,0,.25))">
-        ${busSvg}
-      </div>`,
-      iconSize: [42, 26],
-      iconAnchor: [21, 13]
-    });
-
-    // Two layers: pulse first, then bus on top
-    const pulseMarker = L.marker([b.lat, b.lng], { icon: pulseIcon, zIndexOffset: 0 });
-    const busMarker = L.marker([b.lat, b.lng], { icon: busIcon, zIndexOffset: 100 + busDefs.indexOf(b) * 10 });
-
-    pulseMarker.addTo(map);
-    busMarker.addTo(map);
-
-    busMarkers.push({
-      marker: busMarker,
-      pulse: pulseMarker,
-      lat: b.lat,
-      lng: b.lng,
-      color: b.color,
-      speed: b.speed,
-      sos: b.sos || false,
-      routeIdx: b.route,
-      t: Math.random() // randomize phase
-    });
+    const marker = L.marker([d.lat, d.lng], { icon }).addTo(map);
+    const pulse = L.marker([d.lat, d.lng], { icon: pulseIcon }).addTo(map);
+    d._marker = marker;
+    d._pulse = pulse;
+    d._wp = waypoints[i];
+    d._speed = speeds[i];
   });
 
-  /* Route waypoints for each bus */
-  const routeWaypoints = [
-    [[-25.97, 27.99], [-25.965, 28.0], [-25.96, 28.01], [-25.955, 28.03], [-25.954, 28.05], [-25.953, 28.07], [-25.952, 28.09], [-25.951, 28.11], [-25.95, 28.13]],
-    [[-26.02, 27.99], [-26.01, 28.02], [-26.0, 28.05], [-25.98, 28.07], [-25.96, 28.09], [-25.94, 28.11], [-25.92, 28.14], [-25.91, 28.17]],
-    [[-26.05, 27.97], [-26.04, 27.99], [-26.02, 28.01], [-26.0, 28.03], [-25.98, 28.05], [-25.97, 28.07], [-25.96, 28.09], [-25.95, 28.12]],
-    [[-25.93, 28.08], [-25.92, 28.1], [-25.91, 28.12], [-25.9, 28.14], [-25.89, 28.16], [-25.88, 28.18]],
-  ];
-
-  /* Animate buses along routes */
   let time = 0;
-  function animateBuses() {
+  function animateDrivers() {
     time += 0.008;
-    busMarkers.forEach((b, i) => {
-      const wp = routeWaypoints[i];
-      const t = (time * b.speed * 500 + b.t * wp.length) % wp.length;
+    drivers.forEach(d => {
+      const wp = d._wp;
+      const t = (time * d._speed * 500 + offsets[drivers.indexOf(d)] * wp.length) % wp.length;
       const idx = Math.floor(t);
       const frac = t - idx;
       const next = (idx + 1) % wp.length;
-
       const lat = wp[idx][0] + (wp[next][0] - wp[idx][0]) * frac;
       const lng = wp[idx][1] + (wp[next][1] - wp[idx][1]) * frac;
-
-      b.marker.setLatLng([lat, lng]);
-      b.pulse.setLatLng([lat, lng]);
+      d._marker.setLatLng([lat, lng]);
+      d._pulse.setLatLng([lat, lng]);
     });
-    requestAnimationFrame(animateBuses);
+    requestAnimationFrame(animateDrivers);
   }
-  animateBuses();
+  animateDrivers();
+})();
 
-  // Add CSS for GPS pulse animation to map container
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes gpsP {
-      0% { transform: translate(-50%,-50%) scale(0.4); opacity: .8; }
-      100% { transform: translate(-50%,-50%) scale(2.2); opacity: 0; }
-    }
-  `;
-  document.getElementById('leaflet-map').appendChild(style);
-}
+/* ─────────────────────────────────────────────────────
+   SOS DEMO CLICK
+───────────────────────────────────────────────────── */
+const sosBtn = document.getElementById('sos-ring-btn');
+sosBtn?.addEventListener('click', () => {
+  // Re-trigger animation
+  sosBtn.style.animation = 'none';
+  sosBtn.offsetHeight;
+  sosBtn.style.animation = '';
+});
+
+/* ─────────────────────────────────────────────────────
+   GPS PULSE KEYFRAMES (injected for Leaflet map markers)
+───────────────────────────────────────────────────── */
+const gpsStyle = document.createElement('style');
+gpsStyle.textContent = `
+@keyframes gpsPulse {
+  0% { box-shadow: 0 0 0 0 rgba(33,150,243,0.4); transform: translate(-50%,-50%) scale(1); }
+  70% { box-shadow: 0 0 0 20px rgba(33,150,243,0); transform: translate(-50%,-50%) scale(1.05); }
+  100% { box-shadow: 0 0 0 0 rgba(33,150,243,0); transform: translate(-50%,-50%) scale(1); }
+}`;
+document.head.appendChild(gpsStyle);
 </script>
 </body>
 </html>
