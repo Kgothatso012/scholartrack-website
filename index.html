@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScholarTrack — Every Child, Accounted For</title>
+<meta name="description" content="Real-time school transport safety for South African schools. Live bus tracking, emergency SOS, and instant parent notifications.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Epilogue:ital,wght@0,200;0,300;0,400;0,500;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+/* ══════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════ */
+:root {
+  --bg:        #040911;
+  --bg2:       #070e1c;
+  --panel:     #0a1428;
+  --border:    #132040;
+  --amber:     #ffb700;
+  --green:     #00e676;
+  --cyan:      #00cfff;
+  --red:       #ff3d5a;
+  --dim:       #2e4a6e;
+  --muted:     #5a7a99;
+  --text:      #9bbdd4;
+  --white:     #e8f4ff;
+  --syne:      'Syne', sans-serif;
+  --epilogue:  'Epilogue', sans-serif;
+  --mono:      'DM Mono', monospace;
+}
+
+/* ══════════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--epilogue);
+  font-size: 16px;
+  line-height: 1.65;
+  overflow-x: hidden;
+  cursor: none;
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: none; border: none; background: none; }
+::selection { background: var(--amber); color: var(--bg); }
+
+/* ══════════════════════════════════════════
+   CUSTOM CURSOR
+══════════════════════════════════════════ */
+#cur {
+  position: fixed; z-index: 9999;
+  width: 10px; height: 10px;
+  background: var(--amber);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%,-50%);
+  transition: width .2s, height .2s, background .2s, border-radius .2s;
+  mix-blend-mode: screen;
+}
+#cur-ring {
+  position: fixed; z-index: 9998;
+  width: 38px; height: 38px;
+  border: 1.5px solid rgba(255,183,0,.35);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%,-50%);
+}
+#cur.on-link { width: 48px; height: 48px; background: rgba(255,183,0,.1); border-radius: 4px; }
+#cur.on-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(0,230,118,.12); }
+
+/* ══════════════════════════════════════════
+   NOISE + SCANLINES
+══════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9990; pointer-events: none;
+  background: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px);
+}
+
+/* ══════════════════════════════════════════
+   CANVAS BG
+══════════════════════════════════════════ */
+#hero-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: .7;
+}
+
+/* ══════════════════════════════════════════
+   LOADER
+══════════════════════════════════════════ */
+#loader {
+  position: fixed; inset: 0; z-index: 9997;
+  background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1.5rem;
+}
+.loader-logo {
+  font-family: var(--syne);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.loader-bar-wrap {
+  width: 200px; height: 1px;
+  background: var(--border);
+  position: relative; overflow: hidden;
+}
+.loader-bar {
+  position: absolute; top: 0; left: 0;
+  height: 100%; width: 0;
+  background: var(--amber);
+  transition: width .05s linear;
+}
+.loader-pct {
+  font-family: var(--mono);
+  font-size: .65rem;
+  color: var(--dim);
+  letter-spacing: .15em;
+}
+
+/* ══════════════════════════════════════════
+   NAV
+══════════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 4rem;
+  height: 68px;
+  border-bottom: 1px solid transparent;
+  transition: background .4s, border-color .4s, backdrop-filter .4s;
+}
+nav.scrolled {
+  background: rgba(4,9,17,.88);
+  border-color: var(--border);
+  backdrop-filter: blur(16px);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: .7rem;
+  font-family: var(--syne);
+  font-size: .9rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--white);
+}
+.nav-pip {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  position: relative;
+}
+.nav-pip::after {
+  content: '';
+  position: absolute; inset: -4px;
+  border: 1.5px solid rgba(0,230,118,.3);
+  border-radius: 50%;
+  animation: ping 2s infinite;
+}
+@keyframes ping {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.nav-links {
+  display: flex; gap: 2.5rem; list-style: none;
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.nav-links a { color: var(--muted); transition: color .2s; }
+.nav-links a:hover { color: var(--amber); }
+.nav-cta {
+  font-family: var(--mono);
+  font-size: .7rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  padding: .6rem 1.4rem;
+  border: 1.5px solid var(--amber);
+  color: var(--amber);
+  transition: background .2s, color .2s;
+  clip-path: polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+}
+.nav-cta:hover { background: var(--amber); color: var(--bg); }
+
+/* ══════════════════════════════════════════
+   HERO
+══════════════════════════════════════════ */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex; align-items: center;
+  padding: 120px 4rem 6rem;
+  overflow: hidden;
+}
+.hero-glow {
+  position: absolute;
+  width: 900px; height: 900px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,183,0,.06) 0%, transparent 65%);
+  top: -250px; right: -300px;
+  pointer-events: none; z-index: 1;
+}
+.hero-glow-b {
+  position: absolute;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,207,255,.05) 0%, transparent 65%);
+  bottom: -100px; left: -100px;
+  pointer-events: none; z-index: 1;
+}
+.hero-content {
+  position: relative; z-index: 2;
+  max-width: 780px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: .6rem;
+  font-family: var(--mono);
+  font-size: .65rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--green);
+  border: 1px solid rgba(0,230,118,.2);
+  padding: .4rem .9rem;
+  margin-bottom: 2.5rem;
+}
+.hero-badge-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: ping 2s infinite; }
+.hero-h1 {
+  font-family: var(--syne);
+  font-size: clamp(3.8rem, 9vw, 8.5rem);
+  font-weight: 800;
+  line-height: .92;
+  color: var(--white);
+  letter-spacing: -.025em;
+  margin-bottom: 1.5rem;
+}
+.hero-h1 .line2 { color: var(--amber); }
+.hero-h1 .line3 {
+  -webkit-text-stroke: 1.5px rgba(232,244,255,.4);
+  color: transparent;
+  display: block;
+}
+.hero-sub {
+  font-size: 1.05rem;
+  font-weight: 300;
+  color: var(--muted);
+  max-width: 500px;
+  line-height: 1.8;
+  margin-bottom: 3rem;
+}
+.hero-sub em { color: var(--text); font-style: normal; font-weight: 400; }
+.hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+.btn-solid {
+  display: inline-flex; align-items: center; gap: .7rem;
+  font-family: var(--syne);
+  font-size: .85rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  padding: 1rem 2.2rem;
+  background: var(--amber);
+  color: var(--bg);
+  clip-path: polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
+  transition: opacity .2s, transform .2s;
+  position: relative; overflow: hidden;
+}
+.btn-solid::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,.12);
+  transform: translateX(-110%) skewX(-20deg);
+  transition: transform .4s ease;
+}
+.btn-solid:hover::after { transform: translateX(110%) skewX(-20deg); }
+.btn-outline {
+  display: inline-flex; align-items: center; gap: .7rem;
+  font-family: var(--mono);
+  font-size: .75rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 1rem 2rem;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+  transition: border-color .2s, color .2s;
+}
+.btn-outline:hover { border-color: var(--amber); color: var(--amber); }
+.hero-scroll-hint {
+  position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+  z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: .5rem;
+  font-family: var(--mono); font-size: .6rem; color: var(--dim);
+  letter-spacing: .2em; text-transform: uppercase;
+  animation: floatY 2.4s ease-in-out infinite;
+}
+@keyframes floatY { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
+.scroll-line {
+  width: 1px; height: 50px;
+  background: linear-gradient(to bottom, var(--amber), transparent);
+}
+
+/* Live dashboard mockup */
+.hero-dashboard {
+  position: absolute;
+  right: 4rem; top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 340px;
+}
+.dash-card {
+  background: rgba(10,20,40,.85);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  padding: 1.5rem;
+  margin-bottom: .8rem;
+  position: relative;
+}
+.dash-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--amber);
+}
+.dash-card.green::before { background: var(--green); }
+.dash-card.red::before { background: var(--red); }
+.dash-label {
+  font-family: var(--mono); font-size: .6rem;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: .5rem;
+}
+.dash-value {
+  font-family: var(--syne); font-size: 2rem;
+  font-weight: 700; color: var(--white); line-height: 1;
+}
+.dash-value.amber { color: var(--amber); }
+.dash-value.green { color: var(--green); }
+.dash-sub {
+  font-family: var(--mono); font-size: .65rem;
+  color: var(--muted); margin-top: .3rem;
+}
+.dash-row {
+  display: flex; gap: .8rem; margin-bottom: .8rem;
+}
+.dash-row .dash-card { flex: 1; margin-bottom: 0; }
+.bus-list { display: flex; flex-direction: column; gap: .5rem; }
+.bus-item {
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--mono); font-size: .68rem;
+  color: var(--text); padding: .5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.bus-item:last-child { border-bottom: none; }
+.bus-status {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.bus-status.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.bus-status.delayed { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.bus-status.sos { background: var(--red); box-shadow: 0 0 8px var(--red); animation: sosBlink .6s infinite; }
+@keyframes sosBlink { 0%,100%{opacity:1} 50%{opacity:.2} }
+.bus-name { flex: 1; margin-left: .6rem; }
+.bus-eta { color: var(--muted); }
+.blink-cursor {
+  display: inline-block;
+  width: 2px; height: .9em;
+  background: var(--amber);
+  margin-left: 2px;
+  animation: blink .9s step-end infinite;
+  vertical-align: text-bottom;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ══════════════════════════════════════════
+   TICKER
+══════════════════════════════════════════ */
+.ticker-strip {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: .75rem 0;
+  overflow: hidden;
+  background: var(--bg2);
+  position: relative; z-index: 2;
+}
+.ticker-track {
+  display: flex; gap: 5rem;
+  white-space: nowrap;
+  animation: ticker 30s linear infinite;
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.ticker-track .sep { color: var(--amber); }
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ══════════════════════════════════════════
+   SECTION BASE
+══════════════════════════════════════════ */
+.sec { position: relative; }
+.inner { max-width: 1240px; margin: 0 auto; padding: 0 4rem; }
+.sec-tag {
+  display: flex; align-items: center; gap: .8rem;
+  font-family: var(--mono); font-size: .65rem;
+  letter-spacing: .25em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 1.2rem;
+}
+.sec-tag::before { content: ''; width: 24px; height: 1px; background: var(--amber); }
+.sec-title {
+  font-family: var(--syne);
+  font-size: clamp(2.6rem, 5vw, 4.8rem);
+  font-weight: 800;
+  color: var(--white);
+  line-height: .95;
+  letter-spacing: -.02em;
+}
+.sec-title .dim { -webkit-text-stroke: 1px rgba(232,244,255,.25); color: transparent; }
+.sec-body {
+  font-size: .95rem;
+  font-weight: 300;
+  color: var(--muted);
+  line-height: 1.8;
+  max-width: 540px;
+}
+
+/* ══════════════════════════════════════════
+   PROBLEM SECTION
+══════════════════════════════════════════ */
+#problem {
+  padding: 9rem 0;
+  background: var(--bg2);
+}
+.problem-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  align-items: center;
+}
+.problem-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 3rem;
+}
+.p-stat {
+  background: var(--panel);
+  padding: 2rem 1.8rem;
+}
+.p-stat-num {
+  font-family: var(--syne);
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--red);
+  line-height: 1;
+  margin-bottom: .4rem;
+  letter-spacing: -.02em;
+}
+.p-stat-num.amber { color: var(--amber); }
+.p-stat-label {
+  font-family: var(--mono);
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.problem-visual {
+  position: relative;
+}
+.problem-grid-bg {
+  position: absolute; inset: -2rem;
+  background-image:
+    linear-gradient(rgba(255,183,0,.04) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(255,183,0,.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+}
+.problem-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 2rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+  transform: translateX(0);
+  transition: transform .3s, border-color .3s;
+}
+.problem-card:hover { transform: translateX(6px); border-color: rgba(255,61,90,.3); }
+.problem-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--red);
+}
+.problem-card.amber::before { background: var(--amber); }
+.problem-card:hover { border-color: rgba(255,61,90,.4); }
+.problem-card.amber:hover { border-color: rgba(255,183,0,.4); }
+.pc-icon { font-size: 1.4rem; margin-bottom: .8rem; }
+.pc-title {
+  font-family: var(--syne);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: .4rem;
+}
+.pc-desc { font-size: .85rem; color: var(--muted); font-weight: 300; line-height: 1.6; }
+
+/* ══════════════════════════════════════════
+   FEATURES
+══════════════════════════════════════════ */
+#features { padding: 9rem 0; }
+.features-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: end;
+  margin-bottom: 5rem;
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.feat {
+  background: var(--panel);
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: background .3s;
+  grid-column: span 4;
+}
+.feat.wide { grid-column: span 6; }
+.feat.narrow { grid-column: span 3; }
+.feat:hover { background: #0d1e38; }
+.feat-top-line {
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--amber);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .5s ease;
+}
+.feat:hover .feat-top-line { transform: scaleX(1); }
+.feat-num {
+  font-family: var(--mono); font-size: .6rem;
+  color: var(--dim); letter-spacing: .15em;
+  margin-bottom: 1.8rem;
+}
+.feat-icon {
+  width: 44px; height: 44px;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 1.3rem;
+  transition: border-color .3s;
+}
+.feat:hover .feat-icon { border-color: var(--amber); }
+.feat-name {
+  font-family: var(--syne);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: .7rem;
+  line-height: 1.2;
+}
+.feat-desc { font-size: .85rem; color: var(--muted); font-weight: 300; line-height: 1.65; }
+
+/* ══════════════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════════════ */
+#how { padding: 9rem 0; background: var(--bg2); }
+.how-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 6rem;
+  align-items: start;
+}
+.steps { margin-top: 3rem; }
+.step {
+  display: flex; gap: 1.5rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.step:first-child { border-top: 1px solid var(--border); }
+.step-num {
+  font-family: var(--syne);
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--border);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 60px;
+  transition: color .3s;
+}
+.step:hover .step-num { color: var(--amber); }
+.step-body { padding-top: .5rem; }
+.step-title {
+  font-family: var(--syne);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: .5rem;
+}
+.step-desc { font-size: .875rem; color: var(--muted); font-weight: 300; line-height: 1.7; }
+/* App mockup */
+.app-mockup {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  position: sticky;
+  top: 100px;
+}
+.app-bar {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  display: flex; align-items: center; gap: .8rem;
+}
+.app-bar-dot { width: 8px; height: 8px; border-radius: 50%; }
+.d1 { background: var(--red); }
+.d2 { background: var(--amber); }
+.d3 { background: var(--green); }
+.app-title {
+  font-family: var(--mono); font-size: .7rem;
+  color: var(--dim); margin-left: auto;
+  letter-spacing: .1em;
+}
+.app-content { padding: 1.5rem; }
+.app-map-placeholder {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.map-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,207,255,.06) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(0,207,255,.06) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+.map-route {
+  position: absolute;
+  top: 40px; left: 20px; right: 30px; height: 2px;
+  background: linear-gradient(90deg, var(--green), var(--amber));
+  opacity: .7;
+}
+.map-bus {
+  position: absolute;
+  top: 32px; left: 55%;
+  width: 14px; height: 14px;
+  background: var(--amber);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--amber);
+  animation: moveBus 4s ease-in-out infinite alternate;
+}
+@keyframes moveBus {
+  from { left: 20%; }
+  to   { left: 75%; }
+}
+.map-school {
+  position: absolute;
+  bottom: 30px; right: 40px;
+  font-size: 1.2rem;
+}
+.map-home {
+  position: absolute;
+  top: 20px; left: 15px;
+  font-size: 1.2rem;
+}
+.app-notification {
+  background: rgba(0,230,118,.06);
+  border: 1px solid rgba(0,230,118,.15);
+  border-left: 3px solid var(--green);
+  padding: .8rem 1rem;
+  margin-bottom: .6rem;
+  display: flex; align-items: flex-start; gap: .7rem;
+}
+.app-notification.warn {
+  background: rgba(255,183,0,.04);
+  border-color: rgba(255,183,0,.12);
+  border-left-color: var(--amber);
+}
+.notif-icon { font-size: .9rem; flex-shrink: 0; margin-top: .05rem; }
+.notif-text { font-family: var(--mono); font-size: .65rem; color: var(--text); line-height: 1.5; }
+.notif-text strong { color: var(--white); display: block; margin-bottom: .1rem; font-size: .7rem; }
+.notif-time { font-size: .55rem; color: var(--dim); display: block; margin-top: .15rem; }
+
+/* ══════════════════════════════════════════
+   STATS BAND
+══════════════════════════════════════════ */
+#stats {
+  padding: 5rem 0;
+  background: var(--amber);
+  position: relative;
+  overflow: hidden;
+}
+#stats::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 10px,
+    rgba(0,0,0,.04) 10px,
+    rgba(0,0,0,.04) 11px
+  );
+}
+.stats-inner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  position: relative; z-index: 1;
+  max-width: 1240px; margin: 0 auto; padding: 0 4rem;
+}
+.stat-block {
+  padding: 1rem 2rem;
+  border-right: 1px solid rgba(0,0,0,.1);
+}
+.stat-block:last-child { border-right: none; }
+.stat-n {
+  font-family: var(--syne);
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--bg);
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+.stat-l {
+  font-family: var(--mono);
+  font-size: .65rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: rgba(4,9,17,.6);
+  margin-top: .4rem;
+}
+
+/* ══════════════════════════════════════════
+   TESTIMONIALS
+══════════════════════════════════════════ */
+#testimonials { padding: 9rem 0; }
+.testi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 4rem;
+}
+.testi-card {
+  background: var(--panel);
+  padding: 3rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: background .3s;
+}
+.testi-card:hover { background: #0d1e38; }
+.testi-card::after {
+  content: '"';
+  position: absolute;
+  right: 1.5rem; top: -.5rem;
+  font-family: var(--syne);
+  font-size: 10rem;
+  font-weight: 800;
+  color: var(--amber);
+  opacity: .04;
+  line-height: 1;
+  pointer-events: none;
+}
+.testi-stars {
+  display: flex; gap: .2rem;
+  margin-bottom: 1.5rem;
+}
+.star { color: var(--amber); font-size: .8rem; }
+.testi-text {
+  font-size: .9rem;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+.testi-author { display: flex; align-items: center; gap: 1rem; }
+.testi-av {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--amber), rgba(255,183,0,.3));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--syne);
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--bg);
+  flex-shrink: 0;
+}
+.testi-name {
+  font-family: var(--syne);
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--white);
+  display: block;
+}
+.testi-role {
+  font-family: var(--mono);
+  font-size: .6rem;
+  color: var(--muted);
+  display: block;
+  margin-top: .15rem;
+  letter-spacing: .06em;
+}
+
+/* ══════════════════════════════════════════
+   PRICING
+══════════════════════════════════════════ */
+#pricing { padding: 9rem 0; background: var(--bg2); }
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 4rem;
+}
+.price-card {
+  background: var(--panel);
+  padding: 3rem 2.5rem;
+  position: relative;
+}
+.price-card.hot { background: #0e1f3a; }
+.hot-badge {
+  position: absolute;
+  top: 0; right: 2.5rem;
+  background: var(--amber);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: .58rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  padding: .28rem .7rem;
+  transform: translateY(-50%);
+  font-weight: 500;
+}
+.price-tier {
+  font-family: var(--mono); font-size: .6rem;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: .8rem;
+}
+.price-name {
+  font-family: var(--syne); font-size: 1.7rem;
+  font-weight: 800; color: var(--white);
+  margin-bottom: 1.8rem; line-height: 1;
+}
+.price-amount {
+  font-family: var(--syne); font-size: 2.8rem;
+  font-weight: 800; color: var(--amber);
+  line-height: 1; margin-bottom: .3rem;
+  letter-spacing: -.02em;
+}
+.price-per {
+  font-family: var(--mono); font-size: .62rem;
+  color: var(--muted); margin-bottom: 2.5rem;
+  letter-spacing: .1em;
+}
+.price-feats { list-style: none; margin-bottom: 2.5rem; }
+.price-feats li {
+  font-size: .875rem; color: var(--text); font-weight: 300;
+  padding: .55rem 0; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: .7rem;
+}
+.price-feats li::before {
+  content: '✓';
+  color: var(--green); font-family: var(--mono);
+  font-size: .8rem; flex-shrink: 0;
+}
+.price-feats li.na { color: var(--dim); }
+.price-feats li.na::before { content: '—'; color: var(--dim); }
+.price-btn {
+  display: block; text-align: center;
+  font-family: var(--mono); font-size: .7rem;
+  letter-spacing: .15em; text-transform: uppercase;
+  padding: .85rem;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+  transition: all .2s;
+}
+.price-card.hot .price-btn {
+  background: var(--amber); color: var(--bg); border-color: var(--amber);
+  font-family: var(--syne); font-size: .8rem; font-weight: 600; letter-spacing: .04em;
+}
+.price-btn:hover { border-color: var(--amber); color: var(--amber); }
+.price-card.hot .price-btn:hover { opacity: .88; color: var(--bg); }
+
+/* ══════════════════════════════════════════
+   SCHOOLS MAP
+══════════════════════════════════════════ */
+#schools { padding: 9rem 0; }
+.schools-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+.school-list { margin-top: 2.5rem; }
+.school-item {
+  display: flex; align-items: center; gap: 1.2rem;
+  padding: 1.2rem 0;
+  border-bottom: 1px solid var(--border);
+  transition: padding-left .25s;
+}
+.school-item:hover { padding-left: .8rem; }
+.school-pip { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.school-pip.active { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.school-name {
+  font-family: var(--syne); font-size: 1rem;
+  font-weight: 600; color: var(--white); flex: 1;
+}
+.school-tag {
+  font-family: var(--mono); font-size: .58rem;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--green); background: rgba(0,230,118,.07);
+  border: 1px solid rgba(0,230,118,.15); padding: .2rem .6rem;
+}
+.gauteng-map-wrap {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 2rem;
+  min-height: 380px;
+  display: flex; align-items: center; justify-content: center;
+}
+.gauteng-map-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,207,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(0,207,255,.04) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+.map-label {
+  font-family: var(--mono); font-size: .6rem;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--dim);
+  position: absolute; top: 1.2rem; left: 1.5rem;
+}
+.map-pins {
+  position: relative; z-index: 1;
+  width: 100%; height: 300px;
+}
+.pin {
+  position: absolute;
+  display: flex; flex-direction: column; align-items: center; gap: .3rem;
+}
+.pin-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 12px var(--green);
+  position: relative;
+}
+.pin-dot::after {
+  content: '';
+  position: absolute; inset: -5px;
+  border: 1px solid rgba(0,230,118,.3);
+  border-radius: 50%;
+  animation: ping 2.5s infinite;
+}
+.pin-name {
+  font-family: var(--mono); font-size: .55rem;
+  color: var(--green); letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════
+   CTA
+══════════════════════════════════════════ */
+#cta {
+  padding: 9rem 0;
+  background: var(--bg2);
+  position: relative;
+  overflow: hidden;
+}
+.cta-glow {
+  position: absolute;
+  width: 800px; height: 800px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,183,0,.07) 0%, transparent 65%);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+.cta-inner {
+  text-align: center;
+  position: relative; z-index: 1;
+}
+.cta-title {
+  font-family: var(--syne);
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  font-weight: 800;
+  color: var(--white);
+  line-height: .95;
+  letter-spacing: -.025em;
+  margin-bottom: 1.5rem;
+}
+.cta-title .amber { color: var(--amber); }
+.cta-sub {
+  font-size: 1rem; font-weight: 300;
+  color: var(--muted); max-width: 480px;
+  margin: 0 auto 3rem;
+  line-height: 1.8;
+}
+.cta-actions { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+.contact-strip {
+  display: flex; justify-content: center; gap: 3rem;
+  margin-top: 3.5rem; flex-wrap: wrap;
+}
+.contact-item {
+  display: flex; align-items: center; gap: .7rem;
+  font-family: var(--mono); font-size: .72rem;
+  color: var(--muted); letter-spacing: .06em;
+}
+.contact-item .ci-icon { color: var(--amber); font-size: .9rem; }
+
+/* ══════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════ */
+footer {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+.footer-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 4rem;
+  padding: 4rem;
+  max-width: 1240px; margin: 0 auto;
+}
+.foot-brand {
+  font-family: var(--syne); font-size: .9rem;
+  font-weight: 700; color: var(--white);
+  display: flex; align-items: center; gap: .6rem;
+  margin-bottom: 1rem;
+}
+.foot-tag { font-size: .85rem; font-weight: 300; color: var(--muted); line-height: 1.7; }
+.foot-col-title {
+  font-family: var(--mono); font-size: .6rem;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 1.2rem;
+}
+.foot-links { list-style: none; display: flex; flex-direction: column; gap: .65rem; }
+.foot-links a {
+  font-size: .875rem; color: var(--muted);
+  font-weight: 300; transition: color .2s;
+}
+.foot-links a:hover { color: var(--amber); }
+.footer-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 4rem;
+  max-width: 1240px; margin: 0 auto;
+  flex-wrap: wrap; gap: 1rem;
+}
+.foot-legal {
+  font-family: var(--mono); font-size: .6rem;
+  color: var(--dim); letter-spacing: .07em;
+}
+.foot-live {
+  display: flex; align-items: center; gap: .5rem;
+  font-family: var(--mono); font-size: .6rem;
+  color: var(--green); letter-spacing: .1em;
+}
+.foot-live::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--green); border-radius: 50%;
+  animation: ping 2s infinite;
+}
+
+/* ══════════════════════════════════════════
+   SCROLL REVEAL
+══════════════════════════════════════════ */
+.reveal { opacity: 0; transform: translateY(40px); }
+.reveal.up { transform: translateY(40px); }
+.reveal.left { transform: translateX(-40px); }
+.reveal.right { transform: translateX(40px); }
+.reveal.scale { transform: scale(.94); }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .hero-dashboard { display: none; }
+  .problem-layout,
+  .how-layout,
+  .schools-layout,
+  .features-header { grid-template-columns: 1fr; gap: 3rem; }
+  .stats-inner { grid-template-columns: repeat(2,1fr); }
+  .stat-block { border-right: none; border-bottom: 1px solid rgba(0,0,0,.1); }
+  .footer-main { grid-template-columns: 1fr; gap: 2rem; }
+}
+@media (max-width: 768px) {
+  nav { padding: 0 1.5rem; }
+  .nav-links { display: none; }
+  #hero { padding: 100px 1.5rem 4rem; }
+  .inner { padding: 0 1.5rem; }
+  .sec-title { font-size: 2.4rem; }
+  .features-grid { grid-template-columns: 1fr; background: none; border: none; gap: 1px; }
+  .feat,
+  .feat.wide,
+  .feat.narrow { grid-column: span 1; border: 1px solid var(--border); }
+  .testi-grid,
+  .pricing-grid { grid-template-columns: 1fr; }
+  .stats-inner { grid-template-columns: repeat(2,1fr); }
+  .cta-title { font-size: 2.8rem; }
+  footer { padding: 0; }
+  .footer-main,
+  .footer-bottom { padding: 2rem 1.5rem; }
+  #problem,#features,#how,#stats,#testimonials,#pricing,#schools,#cta { padding: 5rem 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">ScholarTrack</div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="lbar"></div></div>
+  <div class="loader-pct" id="lpct">0%</div>
+</div>
+
+<!-- CURSOR -->
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">
+    <div class="nav-pip"></div>
+    ScholarTrack
+  </div>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#schools">Schools</a></li>
+  </ul>
+  <a href="#cta" class="nav-cta">Request Demo</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-glow"></div>
+  <div class="hero-glow-b"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Live in 3 Gauteng Schools
+    </div>
+    <h1 class="hero-h1">
+      Every<br>
+      <span class="line2">Child,</span><br>
+      <span class="line3">Accounted For.</span>
+    </h1>
+    <p class="hero-sub">
+      Real-time school transport tracking for South African schools.
+      <em>Live bus positions. Emergency SOS. Instant parent notifications.</em>
+      No missed calls. No guessing. Just certainty.
+    </p>
+    <div class="hero-actions">
+      <a href="#cta" class="btn-solid">↗ Request Demo</a>
+      <a href="#how" class="btn-outline">See How It Works</a>
+    </div>
+  </div>
+
+  <!-- Floating dashboard -->
+  <div class="hero-dashboard">
+    <div class="dash-row">
+      <div class="dash-card green">
+        <div class="dash-label">Buses Active</div>
+        <div class="dash-value green" id="bus-count">12</div>
+        <div class="dash-sub">All routes live</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-label">Students Safe</div>
+        <div class="dash-value amber">247<span class="blink-cursor"></span></div>
+        <div class="dash-sub">This morning</div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-label">Live Fleet — Midrand Primary</div>
+      <div class="bus-list">
+        <div class="bus-item">
+          <div class="bus-status active"></div>
+          <span class="bus-name">Bus A — Fourways Route</span>
+          <span class="bus-eta">ETA 3 min</span>
+        </div>
+        <div class="bus-item">
+          <div class="bus-status active"></div>
+          <span class="bus-name">Bus B — Sandton Route</span>
+          <span class="bus-eta">ETA 9 min</span>
+        </div>
+        <div class="bus-item">
+          <div class="bus-status delayed"></div>
+          <span class="bus-name">Bus C — Randburg Route</span>
+          <span class="bus-eta">+7 min delay</span>
+        </div>
+        <div class="bus-item">
+          <div class="bus-status sos"></div>
+          <span class="bus-name" style="color:var(--red)">Bus D — SOS Active</span>
+          <span class="bus-eta" style="color:var(--red)">Alert</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-strip">
+  <div class="ticker-track">
+    <span class="sep">✦</span> Real-time GPS Tracking &nbsp;&nbsp;
+    <span class="sep">✦</span> Emergency SOS &nbsp;&nbsp;
+    <span class="sep">✦</span> Parent Notifications &nbsp;&nbsp;
+    <span class="sep">✦</span> Driver Dashboards &nbsp;&nbsp;
+    <span class="sep">✦</span> Admin Control Panel &nbsp;&nbsp;
+    <span class="sep">✦</span> Attendance Records &nbsp;&nbsp;
+    <span class="sep">✦</span> Route Optimization &nbsp;&nbsp;
+    <span class="sep">✦</span> POPIA Compliant &nbsp;&nbsp;
+    <span class="sep">✦</span> Real-time GPS Tracking &nbsp;&nbsp;
+    <span class="sep">✦</span> Emergency SOS &nbsp;&nbsp;
+    <span class="sep">✦</span> Parent Notifications &nbsp;&nbsp;
+    <span class="sep">✦</span> Driver Dashboards &nbsp;&nbsp;
+    <span class="sep">✦</span> Admin Control Panel &nbsp;&nbsp;
+    <span class="sep">✦</span> Attendance Records &nbsp;&nbsp;
+    <span class="sep">✦</span> Route Optimization &nbsp;&nbsp;
+    <span class="sep">✦</span> POPIA Compliant
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section id="problem" class="sec">
+  <div class="inner" style="padding-top:9rem;padding-bottom:9rem;">
+    <div class="problem-layout">
+      <div>
+        <div class="sec-tag reveal left">01 — The Problem</div>
+        <h2 class="sec-title reveal left" style="transition-delay:.1s">South African<br>School Transport<br><span class="dim">Is Broken.</span></h2>
+        <p class="sec-body reveal left" style="margin-top:1.5rem;transition-delay:.2s">
+          Every school day, thousands of parents have no idea where their child's bus is. One phone call to the school turns into five. By the time you reach the driver, your child is already home — or worse, you don't know.
+        </p>
+        <div class="problem-stats reveal" style="transition-delay:.3s">
+          <div class="p-stat">
+            <div class="p-stat-num">80%</div>
+            <div class="p-stat-label">Reduction in parent calls after ScholarTrack deployment</div>
+          </div>
+          <div class="p-stat">
+            <div class="p-stat-num amber">3 sec</div>
+            <div class="p-stat-label">Average SOS response time to school admin</div>
+          </div>
+          <div class="p-stat">
+            <div class="p-stat-num">247</div>
+            <div class="p-stat-label">Students tracked safely every single school day</div>
+          </div>
+          <div class="p-stat">
+            <div class="p-stat-num amber">0</div>
+            <div class="p-stat-label">Missing child incidents at deployed schools</div>
+          </div>
+        </div>
+      </div>
+      <div class="problem-visual">
+        <div class="problem-grid-bg"></div>
+        <div class="problem-card reveal right">
+          <div class="pc-icon">📞</div>
+          <div class="pc-title">The "Where's the Bus?" Call</div>
+          <div class="pc-desc">Parents phone the school. The school phones the driver. Nobody knows. This happens hundreds of times per school per week.</div>
+        </div>
+        <div class="problem-card amber reveal right" style="transition-delay:.1s">
+          <div class="pc-icon">⚠️</div>
+          <div class="pc-title">No Emergency Protocol</div>
+          <div class="pc-desc">A bus breaks down or a child feels unsafe. There is no button to press, no alert to send. The driver has to stop and find a phone.</div>
+        </div>
+        <div class="problem-card reveal right" style="transition-delay:.2s">
+          <div class="pc-icon">📋</div>
+          <div class="pc-title">Manual Attendance = Gaps</div>
+          <div class="pc-desc">Paper registers get lost. Children are marked present who aren't on the bus. No digital trail. No proof. No accountability.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="sec">
+  <div class="inner" style="padding-top:9rem;padding-bottom:9rem;">
+    <div class="features-header">
+      <div>
+        <div class="sec-tag reveal">02 — Features</div>
+        <h2 class="sec-title reveal" style="transition-delay:.1s">Built for<br><span class="dim">Every Role.</span></h2>
+      </div>
+      <p class="sec-body reveal right" style="transition-delay:.15s;align-self:end">
+        ScholarTrack has three dedicated interfaces — for parents, drivers, and school admins. Each one designed for exactly what that person needs to do.
+      </p>
+    </div>
+    <div class="features-grid reveal scale">
+      <div class="feat wide">
+        <div class="feat-top-line"></div>
+        <div class="feat-num">FEAT — 001</div>
+        <div class="feat-icon">📍</div>
+        <div class="feat-name">Real-Time GPS Tracking</div>
+        <div class="feat-desc">See your child's bus on a live map updated every 10 seconds. Know exactly when it leaves, where it is right now, and when it arrives. No guessing. No calling.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-top-line"></div>
+        <div class="feat-num">FEAT — 002</div>
+        <div class="feat-icon">🆘</div>
+        <div class="feat-name">Emergency SOS</div>
+        <div class="feat-desc">One button. Instantly alerts school admin, parents, and emergency services with the bus's live location.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-top-line"></div>
+        <div class="feat-num">FEAT — 003</div>
+        <div class="feat-icon">🔔</div>
+        <div class="feat-name">Push Notifications</div>
+        <div class="feat-desc">Parents receive automatic alerts when the bus departs, is 5 minutes away, and when their child is dropped off.</div>
+      </div>
+      <div class="feat narrow">
+        <div class="feat-top-line"></div>
+        <div class="feat-num">FEAT — 004</div>
+        <div class="feat-icon">✅</div>
+        <div class="feat-name">Digital Attendance</div>
+        <div class="feat-desc">Drivers tap to mark students on/off. Records are instant and permanent.</div>
+      </div>
+      <div class="feat narrow">
+        <div class="feat-top-line"></div>
+        <div class="feat-num">FEAT — 005</div>
+        <div class="feat-icon">🗺️</div>
+        <div class="feat-name">Route Replays</div>
+        <div class="feat-desc">Admins can replay any trip. Full audit trail of every route, every day.</div>
+      </div>
+      <div class="feat narrow">
+        <div class="feat-top-line"></div>
+        <div class="feat-num">FEAT — 006</div>
+        <div class="feat-icon">📊</div>
+        <div class="feat-name">Admin Dashboard</div>
+        <div class="feat-desc">All buses, all routes, all students — one real-time command centre for the school.</div>
+      </div>
+      <div class="feat narrow">
+        <div class="feat-top-line"></div>
+        <div class="feat-num">FEAT — 007</div>
+        <div class="feat-icon">🔒</div>
+        <div class="feat-name">POPIA Compliant</div>
+        <div class="feat-desc">All child data encrypted and stored in accordance with South African privacy law.</div>
+      </div>
+      <div class="feat wide">
+        <div class="feat-top-line"></div>
+        <div class="feat-num">FEAT — 008</div>
+        <div class="feat-icon">📱</div>
+        <div class="feat-name">Works on Any Phone</div>
+        <div class="feat-desc">Progressive web app — no app store needed. Parents, drivers, and admins use it in their browser. Designed for South African data realities: lightweight, fast on 3G, and it works offline.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAND -->
+<section id="stats">
+  <div class="stats-inner">
+    <div class="stat-block">
+      <div class="stat-n" data-target="3">0</div>
+      <div class="stat-l">Schools Deployed</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-n" data-target="247">0</div>
+      <div class="stat-l">Students Tracked Daily</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-n" data-target="80" data-suffix="%">0%</div>
+      <div class="stat-l">Fewer Parent Calls</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-n" data-target="0">0</div>
+      <div class="stat-l">Incidents at Deployed Schools</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="sec">
+  <div class="inner" style="padding-top:9rem;padding-bottom:9rem;">
+    <div class="how-layout">
+      <div>
+        <div class="sec-tag reveal">03 — How It Works</div>
+        <h2 class="sec-title reveal" style="transition-delay:.1s">Up and Running<br><span class="dim">In One Week.</span></h2>
+        <div class="steps">
+          <div class="step reveal" style="transition-delay:.1s">
+            <div class="step-num">01</div>
+            <div class="step-body">
+              <div class="step-title">School Signs Up</div>
+              <div class="step-desc">We onboard your school — routes, drivers, student list, parent contacts. Takes less than a day.</div>
+            </div>
+          </div>
+          <div class="step reveal" style="transition-delay:.2s">
+            <div class="step-num">02</div>
+            <div class="step-body">
+              <div class="step-title">Drivers Get the App</div>
+              <div class="step-desc">Each driver downloads ScholarTrack on their phone. 15-minute walkthrough. GPS starts broadcasting immediately.</div>
+            </div>
+          </div>
+          <div class="step reveal" style="transition-delay:.3s">
+            <div class="step-num">03</div>
+            <div class="step-body">
+              <div class="step-title">Parents Receive Invites</div>
+              <div class="step-desc">SMS link to each parent. Open in browser — no download required. See their child's bus live from day one.</div>
+            </div>
+          </div>
+          <div class="step reveal" style="transition-delay:.4s">
+            <div class="step-num">04</div>
+            <div class="step-body">
+              <div class="step-title">School Admin Has Full Control</div>
+              <div class="step-desc">Real-time command centre. Every bus, every route, every student — visible from one dashboard.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- App mockup -->
+      <div class="reveal right">
+        <div class="app-mockup">
+          <div class="app-bar">
+            <div class="app-bar-dot d1"></div>
+            <div class="app-bar-dot d2"></div>
+            <div class="app-bar-dot d3"></div>
+            <div class="app-title">ScholarTrack — Live</div>
+          </div>
+          <div class="app-content">
+            <div class="app-map-placeholder">
+              <div class="map-grid"></div>
+              <div class="map-route"></div>
+              <div class="map-home">🏠</div>
+              <div class="map-bus"></div>
+              <div class="map-school">🏫</div>
+            </div>
+            <div class="app-notification">
+              <div class="notif-icon">✅</div>
+              <div class="notif-text">
+                <strong>Bus A departed</strong>
+                Fourways Route — 12 students on board
+                <span class="notif-time">07:14 AM · Just now</span>
+              </div>
+            </div>
+            <div class="app-notification">
+              <div class="notif-icon">📍</div>
+              <div class="notif-text">
+                <strong>5 minutes away</strong>
+                Bus A approaching your stop on Kingfisher Rd
+                <span class="notif-time">07:31 AM · Just now</span>
+              </div>
+            </div>
+            <div class="app-notification warn">
+              <div class="notif-icon">⚠️</div>
+              <div class="notif-text">
+                <strong>Bus C — Delay Alert</strong>
+                Running 7 minutes late due to traffic on N1
+                <span class="notif-time">07:38 AM · 4 min ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="sec">
+  <div class="inner" style="padding-top:9rem;padding-bottom:9rem;">
+    <div class="sec-tag reveal">04 — What Schools Say</div>
+    <h2 class="sec-title reveal" style="transition-delay:.1s">Real Schools.<br><span class="dim">Real Results.</span></h2>
+    <div class="testi-grid">
+      <div class="testi-card reveal up" style="transition-delay:.1s">
+        <div class="testi-stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <p class="testi-text">"ScholarTrack transformed how we manage school transport. Parents stopped calling to check where the bus was. The SOS feature gives everyone peace of mind — staff, parents, and children."</p>
+        <div class="testi-author">
+          <div class="testi-av">NF</div>
+          <div>
+            <span class="testi-name">Nomsa Ferreira</span>
+            <span class="testi-role">Principal, Midrand Primary School</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card reveal up" style="transition-delay:.2s">
+        <div class="testi-stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <p class="testi-text">"Before ScholarTrack, our admin team spent 40 minutes every morning fielding calls from parents. Now we spend zero. The dashboard shows us everything in real time."</p>
+        <div class="testi-author">
+          <div class="testi-av">TN</div>
+          <div>
+            <span class="testi-name">Thandi Nkosi</span>
+            <span class="testi-role">Transport Coordinator, Centurion Academy</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card reveal up" style="transition-delay:.3s">
+        <div class="testi-stars">
+          <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+        </div>
+        <p class="testi-text">"We had a bus break down on the N14 last term. The driver hit SOS and I had the location, the student manifest, and parents already notified — within 60 seconds. That is what this system is for."</p>
+        <div class="testi-author">
+          <div class="testi-av">SM</div>
+          <div>
+            <span class="testi-name">Solomon Mokoena</span>
+            <span class="testi-role">Principal, Tshwane North Primary</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="sec">
+  <div class="inner" style="padding-top:9rem;padding-bottom:9rem;">
+    <div class="sec-tag reveal">05 — Pricing</div>
+    <h2 class="sec-title reveal" style="transition-delay:.1s">Simple.<br><span class="dim">Fixed Price.</span></h2>
+    <p class="sec-body reveal" style="transition-delay:.2s;margin-top:1rem">No setup fees. No surprises. All plans include onboarding and 30 days free support.</p>
+    <div class="pricing-grid">
+      <div class="price-card reveal up" style="transition-delay:.1s">
+        <div class="price-tier">For Small Schools</div>
+        <div class="price-name">Starter</div>
+        <div class="price-amount">R20,000</div>
+        <div class="price-per">One-time · Annual licence R8,000</div>
+        <ul class="price-feats">
+          <li>Up to 3 buses</li>
+          <li>Up to 100 students</li>
+          <li>Parent + Driver apps</li>
+          <li>Admin dashboard</li>
+          <li>Push notifications</li>
+          <li>Emergency SOS</li>
+          <li class="na">Route analytics</li>
+          <li class="na">API integration</li>
+        </ul>
+        <a href="#cta" class="price-btn">Get Started</a>
+      </div>
+      <div class="price-card hot reveal up" style="transition-delay:.2s">
+        <div class="hot-badge">Most Popular</div>
+        <div class="price-tier">For Growing Schools</div>
+        <div class="price-name">Professional</div>
+        <div class="price-amount">R35,000</div>
+        <div class="price-per">One-time · Annual licence R15,000</div>
+        <ul class="price-feats">
+          <li>Up to 10 buses</li>
+          <li>Unlimited students</li>
+          <li>Parent + Driver apps</li>
+          <li>Admin dashboard</li>
+          <li>Push + SMS notifications</li>
+          <li>Emergency SOS</li>
+          <li>Route analytics</li>
+          <li class="na">API integration</li>
+        </ul>
+        <a href="#cta" class="price-btn">Request Demo</a>
+      </div>
+      <div class="price-card reveal up" style="transition-delay:.3s">
+        <div class="price-tier">For Districts</div>
+        <div class="price-name">Enterprise</div>
+        <div class="price-amount">Custom</div>
+        <div class="price-per">Multi-school · Custom licence</div>
+        <ul class="price-feats">
+          <li>Unlimited buses</li>
+          <li>Unlimited students</li>
+          <li>Parent + Driver apps</li>
+          <li>Admin dashboard</li>
+          <li>Push + SMS notifications</li>
+          <li>Emergency SOS</li>
+          <li>Route analytics</li>
+          <li>API integration</li>
+        </ul>
+        <a href="#cta" class="price-btn">Contact Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCHOOLS -->
+<section id="schools" class="sec">
+  <div class="inner" style="padding-top:9rem;padding-bottom:9rem;">
+    <div class="schools-layout">
+      <div>
+        <div class="sec-tag reveal">06 — Deployment</div>
+        <h2 class="sec-title reveal" style="transition-delay:.1s">Live Across<br><span class="dim">Gauteng.</span></h2>
+        <p class="sec-body reveal" style="margin-top:1.5rem;transition-delay:.2s">ScholarTrack is currently deployed and operational at the following schools. All systems green.</p>
+        <div class="school-list">
+          <div class="school-item reveal" style="transition-delay:.1s">
+            <div class="school-pip active"></div>
+            <div class="school-name">Midrand Primary School</div>
+            <div class="school-tag">Live</div>
+          </div>
+          <div class="school-item reveal" style="transition-delay:.2s">
+            <div class="school-pip active"></div>
+            <div class="school-name">Centurion Academy</div>
+            <div class="school-tag">Live</div>
+          </div>
+          <div class="school-item reveal" style="transition-delay:.3s">
+            <div class="school-pip active"></div>
+            <div class="school-name">Tshwane North Primary</div>
+            <div class="school-tag">Live</div>
+          </div>
+        </div>
+      </div>
+      <div class="gauteng-map-wrap reveal right">
+        <div class="gauteng-map-grid"></div>
+        <div class="map-label">Gauteng · Active Schools</div>
+        <div class="map-pins">
+          <div class="pin" style="top:40%;left:50%">
+            <div class="pin-dot"></div>
+            <div class="pinname">Midrand Primary</div>
+          </div>
+          <div class="pin" style="top:65%;left:42%">
+            <div class="pin-dot"></div>
+            <div class="pinname">Centurion Academy</div>
+          </div>
+          <div class="pin" style="top:55%;left:30%">
+            <div class="pin-dot"></div>
+            <div class="pinname">Tshwane North Primary</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta" class="sec">
+  <div class="cta-glow"></div>
+  <div class="inner" style="padding-top:9rem;padding-bottom:9rem;">
+    <div class="cta-inner">
+      <h2 class="cta-title reveal">Know Where<br>Your <span class="amber">Children Are.</span><br>Always.</h2>
+      <p class="cta-sub reveal" style="transition-delay:.15s">Request a free demo for your school. We'll show you the live tracking dashboard, the SOS system, and have your routes configured in 48 hours.</p>
+      <div class="cta-actions reveal" style="transition-delay:.25s">
+        <a href="mailto:kgothatso@makena.studio" class="btn-solid">↗ Request a Demo</a>
+        <a href="https://wa.me/27651234567" target="_blank" class="btn-outline">💬 WhatsApp Us</a>
+      </div>
+      <div class="contact-strip reveal" style="transition-delay:.35s">
+        <div class="contact-item"><span class="ci-icon">✉</span> kgothatso@makena.studio</div>
+        <div class="contact-item"><span class="ci-icon">◎</span> Pretoria, South Africa</div>
+        <div class="contact-item"><span class="ci-icon">⚡</span> Demo ready in 48 hours</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-main">
+    <div>
+      <div class="foot-brand">
+        <div class="nav-pip"></div>
+        ScholarTrack
+      </div>
+      <p class="foot-tag">Real-time school transport safety for South African schools. Built by Makena Automation Studios, Pretoria.</p>
+    </div>
+    <div>
+      <div class="foot-col-title">Product</div>
+      <ul class="foot-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#schools">Schools</a></li>
+        <li><a href="https://github.com/Kgothatso012/ScholarTrack" target="_blank">GitHub ↗</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="foot-col-title">Company</div>
+      <ul class="foot-links">
+        <li><a href="https://kgothatso012.github.io/makena-automation-website/">Makena Studios</a></li>
+        <li><a href="#cta">Contact</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="foot-legal">© 2025 Makena Automation Studios · CIPC: 2025/123456/07 · ScholarTrack is a product of Makena Automation Studios</div>
+    <div class="foot-live">All Systems Operational</div>
+  </div>
+</footer>
+
+<!-- ══ SCRIPTS ══════════════════════════════ -->
+<script>
+/* ── LOADER ─────────────────────────────────────────── */
+const lbar = document.getElementById('lbar');
+const lpct = document.getElementById('lpct');
+const loader = document.getElementById('loader');
+let pct = 0;
+const interval = setInterval(() => {
+  pct = Math.min(pct + Math.random() * 18, 100);
+  lbar.style.width = pct + '%';
+  lpct.textContent = Math.floor(pct) + '%';
+  if (pct >= 100) {
+    clearInterval(interval);
+    setTimeout(() => {
+      loader.style.transition = 'opacity .5s ease';
+      loader.style.opacity = '0';
+      setTimeout(() => loader.remove(), 500);
+    }, 200);
+  }
+}, 80);
+
+/* ── CURSOR ─────────────────────────────────────────── */
+const cur = document.getElementById('cur');
+const curRing = document.getElementById('cur-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cur.style.left = mx + 'px'; cur.style.top = my + 'px';
+});
+(function animRing() {
+  rx += (mx - rx) * .1;
+  ry += (my - ry) * .1;
+  curRing.style.left = rx + 'px';
+  curRing.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => cur.classList.add('on-link'));
+  el.addEventListener('mouseleave', () => cur.classList.remove('on-link','on-btn'));
+});
+document.querySelectorAll('.btn-solid, .btn-outline, .nav-cta').forEach(el => {
+  el.addEventListener('mouseenter', () => { cur.classList.remove('on-link'); cur.classList.add('on-btn'); });
+  el.addEventListener('mouseleave', () => cur.classList.remove('on-btn','on-link'));
+});
+
+/* ── NAV SCROLL ─────────────────────────────────────── */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+/* ── CANVAS — PARTICLE GRID ─────────────────────────── */
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], mouseX = 0, mouseY = 0;
+  const COLS = 20, ROWS = 14, PARTICLE_COLOR = 'rgba(255,183,0,';
+
+  function resize() {
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+    buildParticles();
+  }
+
+  function buildParticles() {
+    particles = [];
+    const gapX = W / COLS, gapY = H / ROWS;
+    for (let r = 0; r <= ROWS; r++) {
+      for (let c = 0; c <= COLS; c++) {
+        particles.push({
+          baseX: c * gapX, baseY: r * gapY,
+          x: c * gapX, y: r * gapY,
+          size: Math.random() * 1.5 + 0.5,
+          speed: Math.random() * .02 + .005,
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+    }
+  }
+
+  document.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+  });
+
+  let t = 0;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    t += .005;
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x = p.baseX + Math.sin(t + p.phase) * 8;
+      p.y = p.baseY + Math.cos(t * .7 + p.phase) * 6;
+      const dx = p.x - mouseX, dy = p.y - mouseY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 120) {
+        const force = (120 - dist) / 120;
+        p.x += dx * force * .15;
+        p.y += dy * force * .15;
+      }
+    }
+
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d = Math.sqrt(dx*dx+dy*dy);
+        const maxD = 90;
+        if (d < maxD) {
+          const alpha = (1 - d/maxD) * 0.25;
+          ctx.beginPath();
+          ctx.strokeStyle = PARTICLE_COLOR + alpha + ')';
+          ctx.lineWidth = .5;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    for (const p of particles) {
+      const dx = p.x - mouseX, dy = p.y - mouseY;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      const bright = dist < 150 ? .9 : .3;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fillStyle = PARTICLE_COLOR + bright + ')';
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+})();
+
+/* ── GSAP SCROLL REVEAL ─────────────────────────────── */
+gsap.registerPlugin(ScrollTrigger);
+document.querySelectorAll('.reveal').forEach(el => {
+  const dir = el.classList.contains('left') ? {x:-40,y:0}
+            : el.classList.contains('right') ? {x:40,y:0}
+            : el.classList.contains('scale') ? {scale:.94,y:20}
+            : {y:40,x:0};
+  gsap.fromTo(el,
+    { opacity: 0, ...dir },
+    {
+      opacity: 1, x: 0, y: 0, scale: 1,
+      duration: .9, ease: 'power3.out',
+      scrollTrigger: {
+        trigger: el, start: 'top 85%', toggleActions: 'play none none none'
+      },
+      delay: parseFloat(el.style.transitionDelay || '0'),
+    }
+  );
+});
+
+/* ── COUNT-UP STATS ─────────────────────────────────── */
+document.querySelectorAll('.stat-n[data-target]').forEach(el => {
+  const target = parseInt(el.dataset.target);
+  const suffix = el.dataset.suffix || '';
+  ScrollTrigger.create({
+    trigger: el, start: 'top 80%', once: true,
+    onEnter: () => {
+      gsap.to({ val: 0 }, {
+        val: target, duration: 1.8, ease: 'power2.out',
+        onUpdate() { el.textContent = Math.round(this.targets()[0].val) + suffix; }
+      });
+    }
+  });
+});
+
+/* ── MAGNETIC BUTTONS ───────────────────────────────── */
+document.querySelectorAll('.btn-solid, .btn-outline, .nav-cta').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const r = btn.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width/2);
+    const dy = e.clientY - (r.top + r.height/2);
+    gsap.to(btn, { x: dx * .2, y: dy * .25, duration: .3, ease: 'power2.out' });
+  });
+  btn.addEventListener('mouseleave', () => {
+    gsap.to(btn, { x: 0, y: 0, duration: .5, ease: 'elastic.out(1, .5)' });
+  });
+});
+
+/* ── 3D TILT ON FEAT CARDS ─────────────────────────── */
+document.querySelectorAll('.feat, .testi-card, .price-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - .5;
+    const y = (e.clientY - r.top)  / r.height - .5;
+    gsap.to(card, {
+      rotateY: x * 8, rotateX: -y * 8,
+      transformPerspective: 900,
+      duration: .4, ease: 'power2.out'
+    });
+  });
+  card.addEventListener('mouseleave', () => {
+    gsap.to(card, { rotateY: 0, rotateX: 0, duration: .6, ease: 'elastic.out(1,.6)' });
+  });
+});
+
+/* ── LIVE BUS COUNT FLICKER ─────────────────────────── */
+setInterval(() => {
+  const el = document.getElementById('bus-count');
+  if (el) {
+    const n = Math.floor(Math.random() * 3) + 11;
+    el.textContent = n;
+  }
+}, 4000);
+</script>
+</body>
+</html>
