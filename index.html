@@ -204,13 +204,73 @@ body::before{
 
 /* Hero right — Map preview */
 .hero-right{position:relative;z-index:2;height:100%}
-.hero-map-wrap{
-  border-radius:24px;overflow:hidden;
+/* Live Activity Feed */
+.hero-feed-wrap{
+  border-radius:20px;overflow:hidden;
   border:1.5px solid var(--border);
-  box-shadow:var(--shadow-lg);
-  background:var(--panel)
+  box-shadow:var(--shadow-lg);background:var(--white)
 }
-#hero-leaflet-map{height:520px;filter:saturate(0.65) brightness(1.05)}
+.feed-header{
+  padding:1rem 1.4rem;display:flex;align-items:center;gap:.7rem;
+  border-bottom:1px solid var(--border);background:var(--surface)
+}
+.feed-h-dot{
+  width:8px;height:8px;background:var(--safe);border-radius:50%;
+  box-shadow:0 0 8px var(--safe);animation:ping 1.8s infinite
+}
+.feed-h-title{
+  font-family:var(--general);font-size:.72rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--text2);flex:1
+}
+.feed-h-live{
+  font-family:var(--general);font-size:.6rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--safe);background:var(--safe-lt);
+  border:1px solid rgba(46,125,50,.2);
+  padding:.18rem .55rem;border-radius:20px
+}
+.feed-body{
+  padding:.6rem;display:flex;flex-direction:column;gap:.4rem;
+  max-height:480px;overflow:hidden
+}
+.feed-item{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.7rem .85rem;border-radius:12px;
+  background:var(--surface);border:1px solid var(--border);
+  animation:feedSlide 0.4s var(--ease) both
+}
+@keyframes feedSlide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.feed-item-icon{
+  width:34px;height:34px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0
+}
+.feed-item-icon svg{width:16px;height:16px;stroke-width:1.5}
+.feed-item-icon.dep{background:rgba(245,166,35,.1)}
+.feed-item-icon.arr{background:rgba(46,125,50,.1)}
+.feed-item-icon.sos{background:rgba(211,47,47,.1)}
+.feed-item-icon.rat{background:rgba(33,150,243,.1)}
+.feed-item-icon.pay{background:rgba(212,175,55,.1)}
+.feed-item-info{flex:1}
+.feed-item-title{
+  font-family:var(--general);font-size:.78rem;font-weight:600;
+  color:var(--text);margin-bottom:.1rem
+}
+.feed-item-sub{
+  font-family:var(--general);font-size:.65rem;color:var(--muted)
+}
+.feed-item-time{
+  font-family:var(--mono);font-size:.58rem;color:var(--muted);
+  white-space:nowrap
+}
+.feed-item-badge{
+  font-family:var(--general);font-size:.55rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:.12rem .45rem;border-radius:20px
+}
+.feed-item-badge.ok{background:var(--safe-lt);color:var(--safe);border:1px solid rgba(46,125,50,.2)}
+.feed-item-badge.dly{background:var(--amber-lt);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
+.feed-item-badge.sos{background:rgba(211,47,47,.08);color:var(--sos);border:1px solid rgba(211,47,47,.2)}
+.feed-item-badge.pay{background:var(--gold-lt);color:#9a7b1e;border:1px solid rgba(212,175,55,.2)}
 
 /* Scroll hint */
 .hero-scroll{
@@ -717,8 +777,7 @@ footer{
   #hero{grid-template-columns:1fr;padding-top:6rem}
   .hero-left{max-width:100%;padding:0 6vw}
   .hero-right{margin-top:3rem;padding:0 6vw}
-  .hero-right .hero-map-wrap{border-radius:16px}
-  #hero-leaflet-map{height:300px}
+  .hero-right .hero-feed-wrap{border-radius:16px}
   .hero-title{font-size:clamp(2.5rem,8vw,4rem)}
   .nav-links{display:none}
   .stats-grid{grid-template-columns:1fr 1fr}
@@ -837,10 +896,17 @@ footer{
     </div>
   </div>
 
-  <!-- RIGHT — Map Preview -->
+  <!-- RIGHT — Live Activity Feed -->
   <div class="hero-right">
-    <div class="hero-map-wrap">
-      <div id="hero-leaflet-map"></div>
+    <div class="hero-feed-wrap">
+      <div class="feed-header">
+        <div class="feed-h-dot"></div>
+        <div class="feed-h-title">Live Platform Activity</div>
+        <div class="feed-h-live">Live</div>
+      </div>
+      <div class="feed-body" id="activity-feed">
+        <!-- Items injected by JS -->
+      </div>
     </div>
   </div>
 
@@ -864,7 +930,7 @@ footer{
     <span class="s">&#9670;</span> Real-time GPS &nbsp;&nbsp;
     <span class="s">&#9670;</span> Verified Drivers &nbsp;&nbsp;
     <span class="s">&#9670;</span> POPIA Compliant &nbsp;&nbsp;
-    <span class="s">&#9670;</span> R100k Platform
+    <span class="s">&#9670;</span> Premium Platform
   </div>
 </div>
 
@@ -1460,102 +1526,55 @@ footer{
   });
 })();
 
-/* ─────────────────────────────────────────────────────
-   HERO LEAFLET MAP
-───────────────────────────────────────────────────── */
-(function initHeroMap() {
-  if (typeof L === 'undefined') return;
-  const map = L.map('hero-leaflet-map', {
-    zoomControl: false, attributionControl: false, scrollWheelZoom: false
-  });
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-  map.getContainer().style.filter = 'saturate(0.6) brightness(1.05)';
-  map.setView([-25.95, 28.12], 11);
+/* Live Activity Feed — replaces hero map */
+(function initActivityFeed() {
+  const feed = document.getElementById('activity-feed');
+  if (!feed) return;
 
-  // Route lines
-  const routes = [
-    L.polyline([[-25.97, 27.99], [-25.96, 28.01], [-25.955, 28.04], [-25.953, 28.07], [-25.95, 28.10], [-25.948, 28.13]], { color: '#D4AF37', weight: 3, opacity: 0.6 }),
-    L.polyline([[-26.02, 27.99], [-26.0, 28.05], [-25.97, 28.09], [-25.94, 28.13], [-25.91, 28.17]], { color: '#2196F3', weight: 3, opacity: 0.6 }),
-    L.polyline([[-26.05, 27.97], [-26.02, 28.01], [-25.99, 28.05], [-25.97, 28.09], [-25.95, 28.12]], { color: '#2E7D32', weight: 3, opacity: 0.6 }),
+  const events = [
+    { icon:'dep', title:'Thabo M. — Trip Departed', sub:'Midrand Primary · 12 students', time:'7:14 AM', badge:'On Time', badgeClass:'ok' },
+    { icon:'arr', title:'Amahle N. — Student Dropped Off', sub:'Centurion Academy · Lerato M.', time:'7:38 AM', badge:'Confirmed', badgeClass:'ok' },
+    { icon:'dep', title:'Lucky K. — Trip Departed', sub:'Tshwane North Primary · 9 students', time:'7:02 AM', badge:'On Route', badgeClass:'ok' },
+    { icon:'pay', title:'Payment Received — R1,800', sub:'Mosele household · May subscription', time:'6:55 AM', badge:'Paid', badgeClass:'pay' },
+    { icon:'arr', title:'Amahle N. — Student Dropped Off', sub:'Centurion Academy · 2 students', time:'7:41 AM', badge:'Confirmed', badgeClass:'ok' },
+    { icon:'dep', title:'Lucky K. — Delayed +7 min', sub:'Tshwane North Primary · N14 traffic', time:'7:28 AM', badge:'Delayed', badgeClass:'dly' },
+    { icon:'sos', title:'Sipho R. — SOS Triggered', sub:'N14 Route · Emergency broadcast sent', time:'7:31 AM', badge:'SOS Active', badgeClass:'sos' },
+    { icon:'pay', title:'Thabo M. — Payment — R4,200', sub:'May route earnings · 14 families', time:'6:50 AM', badge:'Paid', badgeClass:'pay' },
   ];
-  routes.forEach(r => r.addTo(map));
 
-  // School markers
-  const schools = [
-    { lat: -25.95, lng: 28.13, name: 'Midrand Primary', abbr: 'MP', color: '#D4AF37' },
-    { lat: -25.91, lng: 28.17, name: 'Centurion Academy', abbr: 'CA', color: '#2196F3' },
-    { lat: -25.95, lng: 28.12, name: 'Tshwane North Primary', abbr: 'TNP', color: '#2E7D32' },
-  ];
-  schools.forEach(s => {
-    const icon = L.divIcon({
-      className: '',
-      html: `<div style="display:flex;flex-direction:column;align-items:center">
-        <div style="width:30px;height:30px;background:${s.color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2)">
-          <span style="transform:rotate(45deg);font-family:'Clash Display',sans-serif;font-size:8px;font-weight:600;color:white">${s.abbr}</span>
-        </div>
-        <div style="font-family:'General Sans',sans-serif;font-size:9px;color:#666;margin-top:3px;background:white;padding:1px 5px;border-radius:2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.1)">${s.name}</div>
-      </div>`,
-      iconSize: [80, 48], iconAnchor: [15, 38]
-    });
-    L.marker([s.lat, s.lng], { icon }).addTo(map);
-  });
+  const svg = {
+    dep:'<svg viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    arr:'<svg viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    sos:'<svg viewBox="0 0 24 24" fill="none" stroke="#D32F2F" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    pay:'<svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.5"><rect x="1" y="6" width="22" height="12" rx="3"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>',
+  };
 
-  // Animated driver markers
-  const drivers = [
-    { lat: -25.955, lng: 28.04, color: '#D4AF37' },
-    { lat: -26.00, lng: 28.05, color: '#2196F3' },
-    { lat: -25.99, lng: 28.05, color: '#2E7D32' },
-  ];
-  const waypoints = [
-    [[-25.97, 27.99], [-25.96, 28.01], [-25.955, 28.04], [-25.953, 28.07], [-25.95, 28.10], [-25.948, 28.13]],
-    [[-26.02, 27.99], [-26.0, 28.05], [-25.97, 28.09], [-25.94, 28.13], [-25.91, 28.17]],
-    [[-26.05, 27.97], [-26.02, 28.01], [-25.99, 28.05], [-25.97, 28.09], [-25.95, 28.12]],
-  ];
-  const speeds = [0.00025, 0.00022, 0.0002];
-  const offsets = [0, 0.3, 0.6];
+  events.slice(0,6).forEach(e => feed.appendChild(item(e)));
 
-  drivers.forEach((d, i) => {
-    const pulseIcon = L.divIcon({
-      className: '',
-      html: `<div style="position:relative;width:56px;height:56px;transform:translate(-22px,-22px)">
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;border:2px solid ${d.color};opacity:.4;animation:hp 2s ease-out infinite"></div>
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;border:1.5px solid ${d.color};opacity:.25;animation:hp 2s ease-out infinite .45s"></div>
-        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:${d.color};box-shadow:0 0 6px ${d.color}"></div>
-      </div>`,
-      iconSize: [56, 56], iconAnchor: [28, 28]
-    });
-    const carSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20" viewBox="0 0 40 20">
-      <rect x="1" y="4" width="38" height="13" rx="6" fill="${d.color}"/>
-      <rect x="4" y="1" width="20" height="9" rx="4" fill="${d.color}"/>
-      <rect x="5" y="2" width="9" height="6" rx="2" fill="#E3F2FD" opacity=".8"/>
-      <circle cx="9" cy="17" r="3" fill="#111"/>
-      <circle cx="30" cy="17" r="3" fill="#111"/>
-      <rect x="30" y="5" width="6" height="4" rx="2" fill="#FFF9C4" opacity=".8"/>
-    </svg>`;
-    const icon = L.divIcon({ className: '', html: carSvg, iconSize: [40, 20], iconAnchor: [20, 10] });
-    const marker = L.marker([d.lat, d.lng], { icon }).addTo(map);
-    const pulse = L.marker([d.lat, d.lng], { icon: pulseIcon }).addTo(map);
-    d._marker = marker; d._pulse = pulse;
-    d._wp = waypoints[i]; d._speed = speeds[i];
-  });
+  let idx = 6;
+  const interval = setInterval(() => {
+    const ev = events[idx % events.length];
+    const el = item(ev);
+    feed.insertBefore(el, feed.firstChild);
+    if (feed.children.length > 8) feed.removeChild(feed.lastChild);
+    idx++;
+  }, 5000);
 
-  let time = 0;
-  function animate() {
-    time += 0.008;
-    drivers.forEach(d => {
-      const wp = d._wp;
-      const t = (time * d._speed * 500 + offsets[drivers.indexOf(d)] * wp.length) % wp.length;
-      const idx = Math.floor(t);
-      const frac = t - idx;
-      const next = (idx + 1) % wp.length;
-      const lat = wp[idx][0] + (wp[next][0] - wp[idx][0]) * frac;
-      const lng = wp[idx][1] + (wp[next][1] - wp[idx][1]) * frac;
-      d._marker.setLatLng([lat, lng]);
-      d._pulse.setLatLng([lat, lng]);
-    });
-    requestAnimationFrame(animate);
+  function item(ev) {
+    const d = document.createElement('div');
+    d.className = 'feed-item';
+    d.innerHTML = `
+      <div class="feed-item-icon">${svg[ev.icon]}</div>
+      <div class="feed-item-info">
+        <div class="feed-item-title">${ev.title}</div>
+        <div class="feed-item-sub">${ev.sub}</div>
+      </div>
+      <div>
+        <div class="feed-item-badge ${ev.badgeClass}">${ev.badge}</div>
+        <div class="feed-item-time">${ev.time}</div>
+      </div>`;
+    return d;
   }
-  animate();
 })();
 
 /* ─────────────────────────────────────────────────────
