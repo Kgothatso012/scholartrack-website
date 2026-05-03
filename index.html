@@ -60,7 +60,11 @@ a{color:inherit;text-decoration:none}
 button{cursor:pointer;border:none;background:none;font-family:inherit}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
-/* Grain noise */
+/* Particle canvas */
+#hero-canvas{
+  position:absolute;inset:0;z-index:1;
+  pointer-events:none;opacity:.6
+}
 body::before{
   content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
@@ -672,8 +676,8 @@ body::before{
 }
 .testi-card:hover{transform:translateY(-4px);border-color:var(--border-hi);box-shadow:var(--shadow-md)}
 .testi-q{
-  font-family:var(--clash);font-size:4.5rem;font-weight:700;
-  color:rgba(212,175,55,.18);line-height:.7;margin-bottom:.3rem
+  width:36px;height:36px;margin-bottom:.8rem;
+  color:var(--gold);opacity:.5
 }
 .testi-stars{display:flex;gap:.15rem;margin-bottom:1rem}
 .testi-stars svg{width:13px;height:13px;fill:var(--gold)}
@@ -738,6 +742,201 @@ body::before{
   color:var(--safe);background:var(--safe-lt);
   border:1px solid rgba(46,125,50,.15);
   padding:.1rem .45rem;border-radius:20px
+}
+
+/* ─────────────────────────────────────────────────────
+   HOW IT WORKS
+───────────────────────────────────────────────────── */
+#how-it-works{padding:9rem 0;background:var(--white);position:relative;overflow:hidden}
+#how-it-works::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(212,175,55,.03) 0%,transparent 70%)
+}
+.how-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+  margin-top:3rem;position:relative
+}
+.how-step{
+  padding:3rem 2.8rem;
+  position:relative;overflow:hidden;
+  border-right:1px solid var(--border)
+}
+.how-step:last-child{border-right:none}
+.how-step-num{
+  font-family:var(--clash);font-size:5rem;font-weight:700;
+  color:rgba(212,175,55,.1);line-height:1;margin-bottom:1rem;
+  letter-spacing:-.04em
+}
+.how-step-icon{
+  width:52px;height:52px;background:var(--gold-lt);
+  border:1px solid rgba(212,175,55,.2);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1.5rem
+}
+.how-step-icon svg{width:22px;height:22px;stroke:var(--gold);stroke-width:1.5}
+.how-step-title{
+  font-family:var(--clash);font-size:1.25rem;font-weight:600;
+  color:var(--text);margin-bottom:.8rem;line-height:1.2
+}
+.how-step-desc{
+  font-family:var(--general);font-size:.88rem;
+  color:var(--text2);line-height:1.75
+}
+.how-connector{
+  position:absolute;top:3.8rem;right:-18px;width:36px;height:2px;
+  background:linear-gradient(90deg,rgba(212,175,55,.4),transparent);
+  z-index:2
+}
+.how-step:last-child .how-connector{display:none}
+
+/* Connector dots */
+.how-connector-dot{
+  position:absolute;top:-5px;right:-4px;width:12px;height:12px;
+  background:var(--gold);border-radius:50%;
+  box-shadow:0 0 8px rgba(212,175,55,.5)
+}
+
+/* ─────────────────────────────────────────────────────
+   DRIVER PROFILES
+───────────────────────────────────────────────────── */
+#driver-profiles{padding:9rem 0;background:var(--bg);position:relative}
+.driver-profiles-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
+  margin-top:3rem
+}
+.driver-profile-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:20px;overflow:hidden;
+  transition:transform .4s var(--ease),box-shadow .4s,border-color .4s;
+  will-change:transform
+}
+.driver-profile-card:hover{
+  transform:translateY(-10px) perspective(1000px) rotateX(2deg);
+  box-shadow:var(--shadow-lg);border-color:var(--border-hi)
+}
+.dp-card-head{
+  position:relative;overflow:hidden;height:140px;
+  background:linear-gradient(135deg,var(--trust) 0%,var(--trust-lt) 100%)
+}
+.dp-card-head::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 120%,rgba(212,175,55,.15) 0%,transparent 60%)
+}
+.dp-card-head::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(255,255,255,.02) 20px,rgba(255,255,255,.02) 40px)
+}
+.dp-avatar-wrap{
+  position:absolute;bottom:-32px;left:50%;transform:translateX(-50%);
+  z-index:2
+}
+.dp-avatar{
+  width:64px;height:64px;border-radius:50%;border:3px solid var(--white);
+  box-shadow:0 4px 16px rgba(10,37,64,.2);
+  object-fit:cover;background:var(--gold)
+}
+.dp-card-body{padding:2.6rem 1.8rem 1.8rem;text-align:center}
+.dp-name{font-family:var(--clash);font-size:1rem;font-weight:600;color:var(--text);margin-bottom:.2rem}
+.dp-route{font-family:var(--general);font-size:.72rem;color:var(--muted);margin-bottom:.9rem}
+.dp-rating{display:flex;justify-content:center;gap:.25rem;margin-bottom:.9rem}
+.dp-rating svg{width:13px;height:13px;fill:var(--gold)}
+.dp-meta{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1.2rem}
+.dp-meta-item{display:flex;flex-direction:column;align-items:center;gap:.1rem}
+.dp-meta-val{font-family:var(--clash);font-size:1rem;font-weight:600;color:var(--text)}
+.dp-meta-lbl{font-family:var(--general);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.dp-verified{
+  display:inline-flex;align-items:center;gap:.35rem;
+  font-family:var(--general);font-size:.62rem;font-weight:600;
+  color:var(--safe);background:var(--safe-lt);
+  border:1px solid rgba(46,125,50,.15);
+  padding:.25rem .7rem;border-radius:20px
+}
+.dp-verified svg{width:10px;height:10px;stroke:var(--safe);stroke-width:2;fill:none}
+.dp-badge{
+  position:absolute;top:1rem;right:1rem;
+  font-family:var(--general);font-size:.55rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:.2rem .5rem;border-radius:20px;
+  background:rgba(255,255,255,.15);color:var(--white);
+  border:1px solid rgba(255,255,255,.2);
+  backdrop-filter:blur(8px)
+}
+
+/* ─────────────────────────────────────────────────────
+   ANIMATED DRIVER CARDS (replaces static list)
+───────────────────────────────────────────────────── */
+.driver-carousel{
+  overflow:hidden;position:relative;
+  border-top:1px solid var(--border)
+}
+.driver-carousel-track{
+  display:flex;gap:1px;background:var(--border);
+  animation:driverScroll 40s linear infinite;
+  width:max-content
+}
+@keyframes driverScroll{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+.driver-carousel-track:hover{animation-play-state:paused}
+.driver-carousel-wrap{
+  overflow:hidden;border-radius:0;
+  background:var(--border)
+}
+.driver-carousel-inner{
+  display:flex;gap:1px;background:var(--border)
+}
+.dc-card{
+  width:200px;background:var(--white);padding:1rem 1.1rem;
+  display:flex;flex-direction:column;gap:.6rem;flex-shrink:0
+}
+.dc-card-top{display:flex;align-items:center;gap:.6rem}
+.dc-avatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--clash);font-size:.72rem;font-weight:600;color:var(--white)
+}
+.dc-name{font-family:var(--clash);font-size:.85rem;font-weight:600;color:var(--text)}
+.dc-route{font-family:var(--general);font-size:.62rem;color:var(--muted);line-height:1.4}
+.dc-status-row{display:flex;align-items:center;justify-content:space-between}
+.dc-status{
+  font-family:var(--general);font-size:.58rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:.15rem .5rem;border-radius:20px;width:fit-content
+}
+.dc-status.ok{background:var(--safe-lt);color:var(--safe);border:1px solid rgba(46,125,50,.2)}
+.dc-status.dly{background:var(--amber-lt);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
+.dc-status.sos{background:rgba(211,47,47,.08);color:var(--sos);border:1px solid rgba(211,47,47,.2)}
+.dc-eta{font-family:var(--clash);font-size:1.1rem;font-weight:600;color:var(--text)}
+.dc-eta span{font-size:.58rem;font-family:var(--general);color:var(--muted);font-weight:400}
+
+/* ─────────────────────────────────────────────────────
+   STICKY FLOATING CTA
+───────────────────────────────────────────────────── */
+.sticky-cta{
+  position:fixed;bottom:2rem;right:2rem;z-index:900;
+  opacity:0;transform:translateY(20px) scale(.95);
+  transition:all .4s var(--ease);pointer-events:none
+}
+.sticky-cta.visible{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+.sticky-cta-btn{
+  display:flex;align-items:center;gap:.6rem;
+  font-family:var(--general);font-size:.8rem;font-weight:600;
+  padding:.85rem 1.6rem;background:var(--gold);color:var(--trust);
+  border-radius:50px;box-shadow:0 8px 32px rgba(212,175,55,.4);
+  transition:all .25s var(--ease);white-space:nowrap
+}
+.sticky-cta-btn:hover{background:#e0ba3f;transform:scale(1.04);box-shadow:0 12px 40px rgba(212,175,55,.5)}
+.sticky-cta-btn:active{transform:scale(.97)}
+.sticky-cta-btn svg{width:14px;height:14px;stroke:var(--trust);stroke-width:2.5;flex-shrink:0}
+.sticky-cta-pulse{
+  position:absolute;inset:-4px;border-radius:50px;
+  border:2px solid var(--gold);opacity:0;
+  animation:stickyPulse 2.5s ease-out infinite
+}
+@keyframes stickyPulse{
+  0%{transform:scale(1);opacity:.6}
+  100%{transform:scale(1.18);opacity:0}
 }
 
 /* ─────────────────────────────────────────────────────
@@ -848,7 +1047,11 @@ footer{
   .stat-card.featured{grid-column:1/-1}
   .stat-card{border-right:none;border-bottom:1px solid var(--border)}
   .section-header{grid-template-columns:1fr}
-  .driver-list{grid-template-columns:1fr 1fr}
+  .how-grid{grid-template-columns:1fr}
+  .how-step{border-right:none;border-bottom:1px solid var(--border)}
+  .how-step:last-child{border-bottom:none}
+  .how-connector{display:none}
+  .driver-profiles-grid{grid-template-columns:1fr}
   .school-grid{grid-template-columns:1fr}
   .sos-layout{grid-template-columns:1fr}
   .sos-phone-wrap{margin-bottom:2rem}
@@ -857,6 +1060,7 @@ footer{
   .cta-trust{flex-wrap:wrap;gap:1.5rem}
   .role-toggle{flex-direction:column;width:100%}
   .role-btn{justify-content:center}
+  .sticky-cta{bottom:1.2rem;right:1.2rem}
 }
 </style>
 </head>
@@ -882,6 +1086,7 @@ footer{
 
 <!-- HERO -->
 <section id="hero">
+  <canvas id="hero-canvas"></canvas>
   <div class="hero-bg"></div>
 
   <!-- LEFT -->
@@ -1049,6 +1254,47 @@ footer{
   </div>
 </section>
 
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="inner">
+    <div class="sec-tag reveal">03 — How It Works</div>
+    <h2 class="sec-title reveal" style="transition-delay:.1s">
+      From Sign-Up to<br><span class="d">First Trip in 24 Hours.</span>
+    </h2>
+    <p class="sec-body reveal" style="transition-delay:.15s;max-width:520px">
+      No lengthy onboarding. No paperwork迷宫. Parents find drivers, drivers get paid — the platform handles compliance, tracking, and emergency response automatically.
+    </p>
+    <div class="how-grid">
+      <div class="how-step reveal" style="transition-delay:.05s">
+        <div class="how-step-num">01</div>
+        <div class="how-step-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="how-step-title">Create Your Profile</div>
+        <div class="how-step-desc">Parents register and list their children's school, pickup times, and home address. Drivers submit their vehicle documents and undergo POPIA-compliant background verification.</div>
+        <div class="how-connector"><div class="how-connector-dot"></div></div>
+      </div>
+      <div class="how-step reveal" style="transition-delay:.15s">
+        <div class="how-step-num">02</div>
+        <div class="how-step-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="how-step-title">Match & Verify</div>
+        <div class="how-step-desc">Browse verified drivers in your suburb. Check ratings, vehicle type, and route coverage. Confirm your match and agree on weekly rate. All drivers carry commercial insurance.</div>
+        <div class="how-connector"><div class="how-connector-dot"></div></div>
+      </div>
+      <div class="how-step reveal" style="transition-delay:.25s">
+        <div class="how-step-num">03</div>
+        <div class="how-step-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="how-step-title">Track Every Trip</div>
+        <div class="how-step-desc">Real-time GPS on the driver's phone broadcasts position to all parents on the route. SOS button triggers instant emergency protocol — contacts notified, location broadcast, 10111 dialed.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- STATS -->
 <section id="stats">
   <div class="stats-inner">
@@ -1112,50 +1358,167 @@ footer{
         <div class="map-h-live">Live</div>
       </div>
       <div id="leaflet-map"></div>
-      <div class="driver-list">
-        <div class="driver-card">
-          <div class="driver-card-top">
-            <div class="driver-avatar">TM</div>
-            <div>
-              <div class="driver-name">Thabo M.</div>
-              <div class="driver-route">Fourways — Midrand Primary</div>
+      <!-- Animated driver carousel -->
+      <div class="driver-carousel">
+        <div class="driver-carousel-track" id="driver-track">
+          <!-- Set 1 -->
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/thabo/64/64" alt="Thabo M." style="background:linear-gradient(135deg,#b8862a,#8a6419)">
+              <div>
+                <div class="dc-name">Thabo M.</div>
+                <div class="dc-route">Fourways — Midrand Primary</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status ok">On Route</div>
+              <div class="dc-eta">3m <span>ETA</span></div>
             </div>
           </div>
-          <div class="driver-status ok">On Route</div>
-          <div class="driver-eta">3m <span>ETA</span></div>
-        </div>
-        <div class="driver-card">
-          <div class="driver-card-top">
-            <div class="driver-avatar" style="background:linear-gradient(135deg,#2196F3,#1565C0)">AN</div>
-            <div>
-              <div class="driver-name">Amahle N.</div>
-              <div class="driver-route">Sandton — Centurion</div>
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/amahle/64/64" alt="Amahle N." style="background:linear-gradient(135deg,#1565C0,#0d47a1)">
+              <div>
+                <div class="dc-name">Amahle N.</div>
+                <div class="dc-route">Sandton — Centurion Academy</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status ok">On Route</div>
+              <div class="dc-eta">8m <span>ETA</span></div>
             </div>
           </div>
-          <div class="driver-status ok">On Route</div>
-          <div class="driver-eta">8m <span>ETA</span></div>
-        </div>
-        <div class="driver-card">
-          <div class="driver-card-top">
-            <div class="driver-avatar" style="background:linear-gradient(135deg,#2E7D32,#1B5E20)">LK</div>
-            <div>
-              <div class="driver-name">Lucky K.</div>
-              <div class="driver-route">Randburg — TNP</div>
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/lucky/64/64" alt="Lucky K." style="background:linear-gradient(135deg,#1B5E20,#2E7D32)">
+              <div>
+                <div class="dc-name">Lucky K.</div>
+                <div class="dc-route">Randburg — Tshwane North</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status dly">Delayed +7m</div>
+              <div class="dc-eta" style="color:var(--amber)">-- <span>Late</span></div>
             </div>
           </div>
-          <div class="driver-status dly">Delayed +7m</div>
-          <div class="driver-eta" style="color:var(--amber)">-- <span>Late</span></div>
-        </div>
-        <div class="driver-card">
-          <div class="driver-card-top">
-            <div class="driver-avatar" style="background:linear-gradient(135deg,#D32F2F,#8B0000)">SR</div>
-            <div>
-              <div class="driver-name">Sipho R.</div>
-              <div class="driver-route">N14 Route</div>
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/sipho/64/64" alt="Sipho R." style="background:linear-gradient(135deg,#8B0000,#D32F2F)">
+              <div>
+                <div class="dc-name">Sipho R.</div>
+                <div class="dc-route">N14 Corridor — Multiple Schools</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status ok">On Route</div>
+              <div class="dc-eta">12m <span>ETA</span></div>
             </div>
           </div>
-          <div class="driver-status sos">SOS Active</div>
-          <div class="driver-eta" style="color:var(--sos)">SOS <span>Alert</span></div>
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/precious/64/64" alt="Precious M." style="background:linear-gradient(135deg,#6A1B9A,#8E24AA)">
+              <div>
+                <div class="dc-name">Precious M.</div>
+                <div class="dc-route">Sunninghill — Reddfine Hill</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status ok">On Route</div>
+              <div class="dc-eta">5m <span>ETA</span></div>
+            </div>
+          </div>
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/kagiso/64/64" alt="Kagiso D." style="background:linear-gradient(135deg,#00695C,#00897B)">
+              <div>
+                <div class="dc-name">Kagiso D.</div>
+                <div class="dc-route">Midrand — Glen Hurdlow</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status ok">On Route</div>
+              <div class="dc-eta">9m <span>ETA</span></div>
+            </div>
+          </div>
+          <!-- Set 2 (duplicate for seamless loop) -->
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/thabo/64/64" alt="Thabo M." style="background:linear-gradient(135deg,#b8862a,#8a6419)">
+              <div>
+                <div class="dc-name">Thabo M.</div>
+                <div class="dc-route">Fourways — Midrand Primary</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status ok">On Route</div>
+              <div class="dc-eta">3m <span>ETA</span></div>
+            </div>
+          </div>
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/amahle/64/64" alt="Amahle N." style="background:linear-gradient(135deg,#1565C0,#0d47a1)">
+              <div>
+                <div class="dc-name">Amahle N.</div>
+                <div class="dc-route">Sandton — Centurion Academy</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status ok">On Route</div>
+              <div class="dc-eta">8m <span>ETA</span></div>
+            </div>
+          </div>
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/lucky/64/64" alt="Lucky K." style="background:linear-gradient(135deg,#1B5E20,#2E7D32)">
+              <div>
+                <div class="dc-name">Lucky K.</div>
+                <div class="dc-route">Randburg — Tshwane North</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status dly">Delayed +7m</div>
+              <div class="dc-eta" style="color:var(--amber)">-- <span>Late</span></div>
+            </div>
+          </div>
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/sipho/64/64" alt="Sipho R." style="background:linear-gradient(135deg,#8B0000,#D32F2F)">
+              <div>
+                <div class="dc-name">Sipho R.</div>
+                <div class="dc-route">N14 Corridor — Multiple Schools</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status ok">On Route</div>
+              <div class="dc-eta">12m <span>ETA</span></div>
+            </div>
+          </div>
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/precious/64/64" alt="Precious M." style="background:linear-gradient(135deg,#6A1B9A,#8E24AA)">
+              <div>
+                <div class="dc-name">Precious M.</div>
+                <div class="dc-route">Sunninghill — Reddfine Hill</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status ok">On Route</div>
+              <div class="dc-eta">5m <span>ETA</span></div>
+            </div>
+          </div>
+          <div class="dc-card">
+            <div class="dc-card-top">
+              <img class="dc-avatar" src="https://picsum.photos/seed/kagiso/64/64" alt="Kagiso D." style="background:linear-gradient(135deg,#00695C,#00897B)">
+              <div>
+                <div class="dc-name">Kagiso D.</div>
+                <div class="dc-route">Midrand — Glen Hurdlow</div>
+              </div>
+            </div>
+            <div class="dc-status-row">
+              <div class="dc-status ok">On Route</div>
+              <div class="dc-eta">9m <span>ETA</span></div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="map-legend">
@@ -1163,6 +1526,104 @@ footer{
         <div class="legend-item"><div class="legend-dot ylw"></div>Delayed</div>
         <div class="legend-item"><div class="legend-dot red"></div>SOS Active</div>
         <div class="legend-item"><div class="legend-dot blu"></div>GPS Position</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DRIVER PROFILES -->
+<section id="driver-profiles">
+  <div class="inner">
+    <div class="sec-tag reveal">04 — Verified Driver Partners</div>
+    <h2 class="sec-title reveal" style="transition-delay:.1s">
+      Meet Drivers Who<br><span class="d">Make Safety Personal.</span>
+    </h2>
+    <p class="sec-body reveal" style="transition-delay:.15s;max-width:500px">
+      Every driver on ScholarTrack is individually verified, commercially insured, and trained in child passenger safety. These aren't contractors — they're trusted neighbours.
+    </p>
+    <div class="driver-profiles-grid">
+      <div class="driver-profile-card reveal" style="transition-delay:.05s">
+        <div class="dp-card-head">
+          <div class="dp-badge">Top Rated</div>
+          <div class="dp-avatar-wrap">
+            <img class="dp-avatar" src="https://picsum.photos/seed/thabo-m/64/64" alt="Thabo Mkhize">
+          </div>
+        </div>
+        <div class="dp-card-body">
+          <div class="dp-name">Thabo Mkhize</div>
+          <div class="dp-route">Fourways / Midrand Primary · 4.9★</div>
+          <div class="dp-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="dp-meta">
+            <div class="dp-meta-item"><div class="dp-meta-val">47</div><div class="dp-meta-lbl">Trips</div></div>
+            <div class="dp-meta-item"><div class="dp-meta-val">2yr</div><div class="dp-meta-lbl">With ST</div></div>
+            <div class="dp-meta-item"><div class="dp-meta-val">14</div><div class="dp-meta-lbl">Families</div></div>
+          </div>
+          <div class="dp-verified">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            ID Verified · Insured
+          </div>
+        </div>
+      </div>
+      <div class="driver-profile-card reveal" style="transition-delay:.15s">
+        <div class="dp-card-head">
+          <div class="dp-avatar-wrap">
+            <img class="dp-avatar" src="https://picsum.photos/seed/amahle-n/64/64" alt="Amahle Nkosi">
+          </div>
+        </div>
+        <div class="dp-card-body">
+          <div class="dp-name">Amahle Nkosi</div>
+          <div class="dp-route">Sandton / Centurion Academy · 4.8★</div>
+          <div class="dp-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <div class="dp-meta">
+            <div class="dp-meta-item"><div class="dp-meta-val">31</div><div class="dp-meta-lbl">Trips</div></div>
+            <div class="dp-meta-item"><div class="dp-meta-val">1yr</div><div class="dp-meta-lbl">With ST</div></div>
+            <div class="dp-meta-item"><div class="dp-meta-val">9</div><div class="dp-meta-lbl">Families</div></div>
+          </div>
+          <div class="dp-verified">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            ID Verified · Insured
+          </div>
+        </div>
+      </div>
+      <div class="driver-profile-card reveal" style="transition-delay:.25s">
+        <div class="dp-card-head">
+          <div class="dp-badge">New</div>
+          <div class="dp-avatar-wrap">
+            <img class="dp-avatar" src="https://picsum.photos/seed/kagiso-d/64/64" alt="Kagiso Dlamini">
+          </div>
+        </div>
+        <div class="dp-card-body">
+          <div class="dp-name">Kagiso Dlamini</div>
+          <div class="dp-route">Midrand / Glen Hurdlow · 4.7★</div>
+          <div class="dp-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <div class="dp-meta">
+            <div class="dp-meta-item"><div class="dp-meta-val">18</div><div class="dp-meta-lbl">Trips</div></div>
+            <div class="dp-meta-item"><div class="dp-meta-val">4mo</div><div class="dp-meta-lbl">With ST</div></div>
+            <div class="dp-meta-item"><div class="dp-meta-val">6</div><div class="dp-meta-lbl">Families</div></div>
+          </div>
+          <div class="dp-verified">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            ID Verified · Insured
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1358,7 +1819,7 @@ footer{
 
     <div class="testi-grid">
       <div class="testi-card reveal" style="transition-delay:.1s">
-        <div class="testi-q">"</div>
+        <div class="testi-q"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 7.5V4H4v7h3.5c0 2.12-1.12 4.07-3 5.25V22h6v-5.75c0-1.38.72-2.6 1.88-3.37l1.12 1.12H22V4h-7l-.88 3.5H11zm8 0V4h-7l-.88 3.5H11v3.5c0 2.12-1.12 4.07-3 5.25V22h6v-5.75c0-1.38.72-2.6 1.88-3.37l1.12 1.12H22V4h-7l-.88 3.5H11v3.5z"/></svg></div>
         <div class="testi-stars">
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -1380,7 +1841,7 @@ footer{
       </div>
 
       <div class="testi-card reveal" style="transition-delay:.2s">
-        <div class="testi-q">"</div>
+        <div class="testi-q"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 7.5V4H4v7h3.5c0 2.12-1.12 4.07-3 5.25V22h6v-5.75c0-1.38.72-2.6 1.88-3.37l1.12 1.12H22V4h-7l-.88 3.5H11zm8 0V4h-7l-.88 3.5H11v3.5c0 2.12-1.12 4.07-3 5.25V22h6v-5.75c0-1.38.72-2.6 1.88-3.37l1.12 1.12H22V4h-7l-.88 3.5H11v3.5z"/></svg></div>
         <div class="testi-stars">
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -1402,7 +1863,7 @@ footer{
       </div>
 
       <div class="testi-card reveal" style="transition-delay:.3s">
-        <div class="testi-q">"</div>
+        <div class="testi-q"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 7.5V4H4v7h3.5c0 2.12-1.12 4.07-3 5.25V22h6v-5.75c0-1.38.72-2.6 1.88-3.37l1.12 1.12H22V4h-7l-.88 3.5H11zm8 0V4h-7l-.88 3.5H11v3.5c0 2.12-1.12 4.07-3 5.25V22h6v-5.75c0-1.38.72-2.6 1.88-3.37l1.12 1.12H22V4h-7l-.88 3.5H11v3.5z"/></svg></div>
         <div class="testi-stars">
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -1828,6 +2289,78 @@ gpsStyle.textContent = `
   100% { box-shadow: 0 0 0 0 rgba(33,150,243,0); transform: translate(-50%,-50%) scale(1); }
 }`;
 document.head.appendChild(gpsStyle);
+</script>
+
+<!-- Sticky Floating CTA -->
+<div class="sticky-cta" id="sticky-cta">
+  <div class="sticky-cta-pulse"></div>
+  <a href="#cta" class="sticky-cta-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+    Request Demo
+  </a>
+</div>
+
+<!-- Particle Canvas — Hero ambient dots -->
+<script>
+(function initParticles() {
+  var canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var W, H;
+
+  function resize() {
+    var hero = document.getElementById('hero');
+    if (!hero) return;
+    W = canvas.width = hero.offsetWidth;
+    H = canvas.height = hero.offsetHeight;
+  }
+
+  function spawn() {
+    particles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.3,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -Math.random() * 0.4 - 0.1,
+      a: Math.random() * 0.5 + 0.1,
+      col: Math.random() > 0.7 ? 'rgba(212,175,55,' : 'rgba(10,37,64,'
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.col + p.a + ')';
+      ctx.fill();
+      p.x += p.vx;
+      p.y += p.vy;
+      p.a -= 0.001;
+      if (p.a <= 0 || p.y < -10) {
+        particles.splice(i, 1);
+        i--;
+      }
+    }
+    if (particles.length < 60) spawn();
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  for (var j = 0; j < 40; j++) spawn();
+  draw();
+
+  // Sticky CTA on scroll
+  var sticky = document.getElementById('sticky-cta');
+  if (sticky) {
+    window.addEventListener('scroll', function() {
+      sticky.classList.toggle('visible', window.scrollY > window.innerHeight * 0.6);
+    });
+  }
+})();
 </script>
 </body>
 </html>
