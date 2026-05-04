@@ -325,7 +325,7 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
 .hero-feed-wrap{
   border-radius:20px;overflow:hidden;
   border:1.5px solid var(--border);
-  box-shadow:var(--shadow-lg);background:var(--white);
+  box-shadow:0 24px 64px rgba(0,0,0,.4);background:var(--surface);
   position:relative
 }
 .hero-feed-wrap::before{
@@ -335,7 +335,7 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
 }
 .feed-header{
   padding:1rem 1.4rem;display:flex;align-items:center;gap:.7rem;
-  border-bottom:1px solid var(--border);background:var(--surface)
+  border-bottom:1px solid var(--border);background:var(--surface-2)
 }
 .feed-h-dot{
   width:8px;height:8px;background:var(--safe);border-radius:50%;
@@ -376,13 +376,13 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
 .feed-item-info{flex:1}
 .feed-item-title{
   font-family:var(--general);font-size:.78rem;font-weight:600;
-  color:var(--text);margin-bottom:.1rem
+  color:var(--white);margin-bottom:.1rem
 }
 .feed-item-sub{
-  font-family:var(--general);font-size:.65rem;color:var(--muted)
+  font-family:var(--general);font-size:.65rem;color:var(--slate)
 }
 .feed-item-time{
-  font-family:var(--mono);font-size:.58rem;color:var(--muted);
+  font-family:var(--mono);font-size:.58rem;color:var(--slate-dim);
   white-space:nowrap
 }
 .feed-item-badge{
@@ -509,7 +509,7 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
   display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);
   border:1px solid var(--border);margin-top:2.5rem;
 }
-.ps-cell{background:var(--white);padding:2rem 1.8rem}
+.ps-cell{background:var(--surface);padding:2rem 1.8rem}
 .ps-num{
   font-family:var(--clash);font-size:3rem;font-weight:600;
   color:var(--sos);letter-spacing:-.02em;line-height:1;margin-bottom:.4rem;
@@ -529,13 +529,13 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
   border:1px solid var(--border);margin-top:3rem;
 }
 .feat{
-  background:var(--white);
+  background:var(--surface);
   padding:2.2rem;
   position:relative;overflow:hidden;
   grid-column:span 4;
   transition:background .3s;
 }
-.feat:hover{background:var(--surface)}
+.feat:hover{background:var(--surface-2)}
 .feat.wide{grid-column:span 6}
 .feat.narrow{grid-column:span 3}
 .feat-line{
@@ -570,7 +570,7 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
 ───────────────────────────────────────────────────── */
 .ticker-strip{
   border-top:1px solid var(--border);border-bottom:1px solid var(--border);
-  padding:.55rem 0;overflow:hidden;background:var(--white)
+  padding:.55rem 0;overflow:hidden;background:var(--black)
 }
 .ticker-track{
   display:flex;gap:3.5rem;white-space:nowrap;
@@ -704,11 +704,11 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
   background:var(--border)
 }
 .driver-card{
-  background:var(--white);padding:1.1rem 1.3rem;
+  background:var(--surface);padding:1.1rem 1.3rem;
   display:flex;flex-direction:column;gap:.6rem;
   transition:background .2s;cursor:pointer
 }
-.driver-card:hover{background:var(--surface)}
+.driver-card:hover{background:var(--surface-2)}
 .driver-card-top{display:flex;align-items:center;gap:.7rem}
 .driver-avatar{
   width:36px;height:36px;border-radius:50%;
@@ -746,10 +746,10 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
 /* ─────────────────────────────────────────────────────
    SOS DEMO — PREMIUM INTERACTIVE
 ───────────────────────────────────────────────────── */
-#sos-demo{padding:9rem 0;background:var(--white);position:relative;overflow:hidden}
+#sos-demo{padding:9rem 0;background:var(--surface);position:relative;overflow:hidden}
 #sos-demo::before{
   content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 50% 50% at 30% 50%,rgba(211,47,47,.03) 0%,transparent 70%)
+  background:radial-gradient(ellipse 50% 50% at 30% 50%,rgba(239,68,68,.04) 0%,transparent 70%)
 }
 .sos-layout{
   display:grid;grid-template-columns:1fr 1fr;gap:5rem;
@@ -863,20 +863,20 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
 /* ─────────────────────────────────────────────────────
    SCHOOL CARDS — PREMIUM BADGES
 ───────────────────────────────────────────────────── */
-#schools{padding:9rem 0;background:var(--bg);position:relative}
+#schools{padding:9rem 0;background:var(--black);position:relative}
 .school-grid{
   display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;
   margin-top:3rem
 }
 .school-card{
-  background:var(--white);border:1.5px solid var(--border);
+  background:var(--surface);border:1.5px solid var(--border);
   border-radius:20px;overflow:hidden;
   transition:transform .4s var(--ease),box-shadow .4s,border-color .4s;
   will-change:transform
 }
 .school-card:hover{
   transform:translateY(-8px) perspective(1000px) rotateX(2deg) rotateY(0deg);
-  box-shadow:var(--shadow-lg);border-color:var(--border-hi)
+  box-shadow:0 24px 64px rgba(0,0,0,.4);border-color:var(--border-amber)
 }
 .sch-card-head{
   padding:1.4rem 1.4rem 1.1rem;
@@ -919,10 +919,10 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
 /* ─────────────────────────────────────────────────────
    TESTIMONIALS
 ───────────────────────────────────────────────────── */
-#testimonials{padding:9rem 0;background:var(--white);position:relative;overflow:hidden}
+#testimonials{padding:9rem 0;background:var(--black);position:relative;overflow:hidden}
 #testimonials::before{
   content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 50% 60% at 50% 50%,rgba(212,175,55,.03) 0%,transparent 70%)
+  background:radial-gradient(ellipse 50% 60% at 50% 50%,rgba(217,119,6,.04) 0%,transparent 70%)
 }
 .testi-grid{
   display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;
@@ -967,7 +967,7 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
    TRUST STRIP
 ───────────────────────────────────────────────────── */
 .trust-strip{
-  padding:3.5rem 0;background:var(--white);
+  padding:3.5rem 0;background:var(--black);
   border-bottom:1px solid var(--border)
 }
 .trust-inner{max-width:1300px;margin:0 auto;padding:0 5vw}
@@ -1064,14 +1064,14 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
   margin-top:3rem
 }
 .driver-profile-card{
-  background:var(--white);border:1.5px solid var(--border);
+  background:var(--surface);border:1.5px solid var(--border);
   border-radius:20px;overflow:hidden;
   transition:transform .4s var(--ease),box-shadow .4s,border-color .4s;
   will-change:transform
 }
 .driver-profile-card:hover{
   transform:translateY(-10px) perspective(1000px) rotateX(2deg);
-  box-shadow:var(--shadow-lg);border-color:var(--border-hi)
+  box-shadow:0 24px 64px rgba(0,0,0,.4);border-color:var(--border-amber)
 }
 .dp-card-head{
   position:relative;overflow:hidden;height:140px;
@@ -1257,7 +1257,7 @@ body.on-link #cur{width:48px;height:48px;border-radius:6px;background:rgba(217,1
    FOOTER
 ───────────────────────────────────────────────────── */
 footer{
-  background:var(--white);border-top:1px solid var(--border);
+  background:var(--surface);border-top:1px solid var(--border);
   padding:4rem 0 2rem
 }
 .footer-inner{max-width:1300px;margin:0 auto;padding:0 5vw}
@@ -1271,16 +1271,16 @@ footer{
   color:var(--text);margin-bottom:1rem
 }
 .footer-logo svg{width:28px;height:28px}
-.footer-tagline{font-family:var(--general);font-size:.85rem;color:var(--text2);line-height:1.65;max-width:240px}
-.footer-col-title{font-family:var(--general);font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+.footer-tagline{font-family:var(--general);font-size:.85rem;color:var(--slate);line-height:1.65;max-width:240px}
+.footer-col-title{font-family:var(--general);font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--slate);margin-bottom:1rem}
 .footer-links{display:flex;flex-direction:column;gap:.55rem}
-.footer-links a{font-family:var(--general);font-size:.85rem;color:var(--text2);transition:color .2s}
-.footer-links a:hover{color:var(--gold)}
+.footer-links a{font-family:var(--general);font-size:.85rem;color:var(--slate);transition:color .2s}
+.footer-links a:hover{color:var(--amber)}
 .footer-bottom{
   padding-top:1.5rem;border-top:1px solid var(--border);
   display:flex;justify-content:space-between;align-items:center
 }
-.footer-copy{font-family:var(--general);font-size:.72rem;color:var(--muted)}
+.footer-copy{font-family:var(--general);font-size:.72rem;color:var(--slate)}
 .footer-legal{display:flex;gap:1.5rem}
 .footer-legal a{font-family:var(--general);font-size:.72rem;color:var(--muted);transition:color .2s}
 .footer-legal a:hover{color:var(--text2)}
@@ -2166,15 +2166,15 @@ footer{
 /* ─────────────────────────────────────────────────────
    SA PRICING SECTION
 ───────────────────────────────────────────────────── */
-#pricing{padding:9rem 0;background:var(--bg);position:relative;overflow:hidden}
+#pricing{padding:9rem 0;background:var(--black);position:relative;overflow:hidden}
 .pricing-grid{
   display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
   background:var(--border);border:1px solid var(--border);margin-top:3rem;
 }
 .price-card{
-  background:var(--white);padding:3rem 2.5rem;position:relative;
+  background:var(--surface);padding:3rem 2.5rem;position:relative;
 }
-.price-card.hot{background:var(--surface)}
+.price-card.hot{background:var(--surface-2)}
 .hot-badge{
   position:absolute;top:0;right:2rem;
   background:var(--gold);color:var(--white);
@@ -2224,7 +2224,7 @@ footer{
 /* ─────────────────────────────────────────────────────
    SA FEATURES SECTION
 ───────────────────────────────────────────────────── */
-#sa{padding:7rem 0;background:var(--white);position:relative;overflow:hidden}
+#sa{padding:7rem 0;background:var(--surface);position:relative;overflow:hidden}
 .sa-strip{
   position:absolute;left:0;top:0;bottom:0;width:5px;
   display:flex;flex-direction:column;
@@ -2256,7 +2256,7 @@ footer{
   border:1px solid var(--border);
 }
 .sa-feat{
-  background:var(--white);padding:2rem;
+  background:var(--black);padding:2rem;
   display:flex;align-items:flex-start;gap:1rem;
 }
 .sa-feat-icon{
@@ -2598,8 +2598,8 @@ footer{
 </section>
 
 <!-- LEAD CAPTURE MODAL -->
-<div id="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9990;background:rgba(10,37,64,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem">
-  <div id="modal-box" style="background:var(--white);border-radius:16px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;position:relative;box-shadow:var(--shadow-lg)">
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:1rem">
+  <div id="modal-box" style="background:var(--surface);border-radius:16px;border:1px solid var(--border);max-width:500px;width:100%;max-height:90vh;overflow-y:auto;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.6)">
     <button id="modal-close" style="position:absolute;top:1rem;right:1rem;background:none;border:none;cursor:pointer;opacity:.5;padding:.5rem;line-height:1" aria-label="Close">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0A2540" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
