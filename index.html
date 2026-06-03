@@ -1328,6 +1328,8 @@ footer{
   .sticky-cta{bottom:1.2rem;right:1.2rem}
 }
 </style>
+<!-- Plausible Analytics (privacy-friendly, POPIA-compliant) -->
+<script defer data-domain="scholartrack.co.za" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
 
@@ -1423,7 +1425,7 @@ footer{
           Start Earning Today
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </a>
-        <a href="https://play.google.com" target="_blank" rel="noopener" class="btn-ghost">
+        <a href="https://play.google.com/store/apps/details?id=com.scholartrack.sa" target="_blank" rel="noopener" class="btn-ghost">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="22" height="12" rx="3"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
           See Driver App
         </a>
@@ -2684,16 +2686,34 @@ document.getElementById('open-modal-driver').addEventListener('click', function(
   document.getElementById('form-success').style.display = 'none';
   document.getElementById('lead-form').style.display = 'flex';
 });
-document.getElementById('lead-form').addEventListener('submit', function(e) {
+document.getElementById('lead-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   var data = {};
   new FormData(this).forEach(function(v,k){ data[k]=v; });
   data.timestamp = new Date().toISOString();
   data.source = 'scholartrack-website';
-  console.log('Lead submitted:', JSON.stringify(data));
-  // Show success state
-  document.getElementById('lead-form').style.display = 'none';
-  document.getElementById('form-success').style.display = 'block';
+  // Supabase edge function endpoint (public, anon key — RLS gates writes via service role)
+  var endpoint = 'https://zjcribmwgavpzycgpwva.supabase.co/functions/v1/submit-lead';
+  var submitBtn = this.querySelector('button[type="submit"]');
+  var origText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting…';
+  try {
+    var r = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    var json = await r.json();
+    if (!r.ok || !json.ok) throw new Error(json.error || ('HTTP ' + r.status));
+    // Show success state
+    document.getElementById('lead-form').style.display = 'none';
+    document.getElementById('form-success').style.display = 'block';
+  } catch (err) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = origText;
+    alert('Could not submit. Please email hello@scholartrack.co.za or try again. (' + (err.message || err) + ')');
+  }
 });
 document.querySelectorAll('#lead-form input[type=text],#lead-form input[type=email],#lead-form input[type=tel],#lead-form input[type=number]').forEach(function(inp) {
   inp.addEventListener('focus', function(){ this.style.borderColor='var(--amber)'; });
@@ -2725,7 +2745,7 @@ document.querySelectorAll('#lead-form input[type=text],#lead-form input[type=ema
         <div class="footer-col-title">Drivers</div>
         <div class="footer-links">
           <a href="#cta" onclick="document.getElementById('modal-overlay').style.display='flex';document.getElementById('modal-role-parent').checked=true;return false">Apply to Drive</a>
-          <a href="https://play.google.com" target="_blank" rel="noopener">Driver App</a>
+          <a href="https://play.google.com/store/apps/details?id=com.scholartrack.sa" target="_blank" rel="noopener">Driver App</a>
           <a href="#cta" onclick="document.getElementById('modal-overlay').style.display='flex';document.getElementById('modal-role-driver').checked=true;return false">Compliance Docs</a>
           <a href="#cta" onclick="document.getElementById('modal-overlay').style.display='flex';document.getElementById('modal-role-driver').checked=true;return false">Earnings</a>
         </div>
@@ -2751,6 +2771,146 @@ document.querySelectorAll('#lead-form input[type=text],#lead-form input[type=ema
   </div>
 </footer>
 
+<!-- ═══════════════════════════════════════════════════════
+     LEGAL: PRIVACY POLICY
+══════════════════════════════════════════════════════ -->
+<section id="privacy-policy" style="padding:6rem 2rem;background:var(--black);border-top:1px solid var(--border);color:var(--white)">
+  <div style="max-width:900px;margin:0 auto">
+    <h2 class="sec-title" style="font-family:var(--clash);font-size:clamp(2rem,3vw,2.8rem);font-weight:700;margin-bottom:1.5rem;color:var(--white)">Privacy Policy</h2>
+    <p style="font-family:var(--general);font-size:.9rem;color:var(--slate);margin-bottom:1.5rem">Last updated: <strong style="color:var(--white)">3 June 2026</strong>. Effective immediately.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">1. Who we are</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">ScholarTrack is operated by Makena Building Group (Pty) Ltd, a South African company registered in Pretoria. We provide a two-sided marketplace connecting parents with verified private drivers for school transport. References to "we", "us", or "ScholarTrack" in this policy refer to that company.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">2. What information we collect</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:.5rem">We collect information you provide directly:</p>
+    <ul style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem;padding-left:1.5rem">
+      <li><strong style="color:var(--white)">Account data:</strong> name, email, phone number, role (parent/driver/admin), password (hashed).</li>
+      <li><strong style="color:var(--white)">Parent data:</strong> children's names, school, pickup/drop-off addresses, profile photos.</li>
+      <li><strong style="color:var(--white)">Driver data:</strong> South African ID number, driver's license, PDP (Professional Driving Permit), vehicle registration, criminal record check, roadworthy certificate, insurance, operating license, profile photo, banking details for payouts.</li>
+      <li><strong style="color:var(--white)">Location data:</strong> live GPS during active trips, with start/stop timestamps.</li>
+      <li><strong style="color:var(--white)">Trip data:</strong> manifest (which child is on which trip), check-in/check-out timestamps, route waypoints.</li>
+      <li><strong style="color:var(--white)">Communications:</strong> in-app chat between parents and drivers, panic alert history, support requests.</li>
+    </ul>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">3. How we use it</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">We use the information to: (a) verify driver eligibility and parent accounts; (b) match parents with drivers in their area; (c) provide real-time trip tracking and emergency response; (d) process trip payments; (e) send service notifications; (f) comply with South African transport law and POPIA.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">4. POPIA (Protection of Personal Information Act)</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">ScholarTrack processes personal information of minors (children's names, schools, locations) and of adult users (parents, drivers, admins). We are the "responsible party" under POPIA. We process this information only for the purposes stated in section 3, with your consent (or that of a parent/guardian for minors), and we do not sell or share it with third parties except as required to deliver the service (e.g. payment processors, mapping providers) or as required by law.</p>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">You have the right to: (a) access your personal information; (b) correct or delete it; (c) object to processing; (d) lodge a complaint with the Information Regulator. Contact our Information Officer at <a href="mailto:privacy@scholartrack.co.za" style="color:var(--amber)">privacy@scholartrack.co.za</a>.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">5. Children's information</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">We process children's information only as needed to provide the school transport service (manifest, pickup, drop-off, real-time tracking). We do not collect children's information directly from children — only from their parents. We do not use children's information for advertising or profiling.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">6. How we share information</h3>
+    <ul style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem;padding-left:1.5rem">
+      <li><strong style="color:var(--white)">With the other party in a trip:</strong> parents see the driver and vehicle; drivers see the children they're transporting. Both see real-time GPS.</li>
+      <li><strong style="color:var(--white)">With payment processors:</strong> Paystack processes parent payments; we share name, amount, and reference.</li>
+      <li><strong style="color:var(--white)">With law enforcement:</strong> in response to a valid subpoena, court order, or to assist in an active emergency (e.g. SOS panic alert).</li>
+      <li><strong style="color:var(--white)">With school administrators:</strong> if your school is registered with us, we may share your child's attendance with the school's admin dashboard.</li>
+    </ul>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">7. How long we keep your data</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">We keep account data while your account is active. Trip records (manifest, GPS breadcrumbs, panic alert history) are kept for 5 years for legal and safety review. After account deletion, we anonymize trip records within 30 days.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">8. How we protect your data</h3>
+    <ul style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem;padding-left:1.5rem">
+      <li>All traffic is HTTPS.</li>
+      <li>Supabase Row Level Security (RLS) ensures users only see their own data.</li>
+      <li>Passwords are hashed (bcrypt).</li>
+      <li>Payment processing happens in PCI-DSS-compliant infrastructure (Paystack).</li>
+      <li>Service-layer ownership guards verify every mutating action.</li>
+    </ul>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">9. Marketing leads (this form)</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">When you submit the form on this page, we collect the role, name, email, phone, area, vehicle (if driver), number of children (if parent), and your IP / user agent. We use this to contact you about ScholarTrack. We don't share it. You can ask us to delete it at any time by emailing <a href="mailto:privacy@scholartrack.co.za" style="color:var(--amber)">privacy@scholartrack.co.za</a>.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">10. Contact</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">Information Officer: Kgothatso Makena, Makena Building Group (Pty) Ltd, 4/1619 Soshanguve-A, 0152, South Africa. Email: <a href="mailto:privacy@scholartrack.co.za" style="color:var(--amber)">privacy@scholartrack.co.za</a>. Phone: +27 69 533 7778.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     LEGAL: TERMS OF SERVICE
+══════════════════════════════════════════════════════ -->
+<section id="terms-of-service" style="padding:6rem 2rem;background:var(--surface);border-top:1px solid var(--border);color:var(--white)">
+  <div style="max-width:900px;margin:0 auto">
+    <h2 class="sec-title" style="font-family:var(--clash);font-size:clamp(2rem,3vw,2.8rem);font-weight:700;margin-bottom:1.5rem;color:var(--white)">Terms of Service</h2>
+    <p style="font-family:var(--general);font-size:.9rem;color:var(--slate);margin-bottom:1.5rem">Last updated: <strong style="color:var(--white)">3 June 2026</strong>.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">1. Acceptance</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">By using ScholarTrack (the app, the website, or the marketplace), you agree to these terms. If you don't agree, don't use the service.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">2. Eligibility</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">Parents must be 18+ and the legal parent/guardian of any child they register. Drivers must hold a valid South African driver's license, PDP, vehicle roadworthy, and pass our background check. Admins must be authorised by a participating school.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">3. The service</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">ScholarTrack is a marketplace. We connect parents with drivers; we do not employ drivers. We provide trip tracking, payment processing, and safety tools. We are not a transport operator.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">4. Fees</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">Parents pay a per-trip fee shown in the app. Drivers pay a platform commission (currently 15%) on each completed trip. Subscriptions for schools are billed monthly. Refunds are handled per the refund policy below.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">5. Refund policy</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">If a trip is cancelled more than 12 hours before scheduled pickup, full refund. Less than 12 hours: 50% refund. After driver has departed: no refund unless driver no-shows. No-shows are refunded in full within 48 hours.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">6. Safety</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">All drivers are background-checked. Parents receive real-time GPS tracking and an SOS button. We review every safety incident. Drivers who fail safety checks are removed.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">7. Acceptable use</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">No harassment, no false SOS alerts, no impersonation, no off-platform contact for the purpose of avoiding platform fees. We will ban accounts that violate these rules.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">8. Disclaimers</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">ScholarTrack is provided "as is". We don't guarantee uninterrupted service. We're not liable for indirect, incidental, or consequential damages. Our total liability is capped at the fees paid in the last 12 months.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">9. Governing law</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">These terms are governed by the laws of the Republic of South Africa. Disputes are subject to the jurisdiction of the Gauteng Division of the High Court, Pretoria.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">10. Changes</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">We may update these terms. Material changes will be communicated by email or in-app notification at least 14 days before they take effect. Continued use after that constitutes acceptance.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     LEGAL: POPIA COMPLIANCE
+══════════════════════════════════════════════════════ -->
+<section id="popia" style="padding:6rem 2rem;background:var(--black);border-top:1px solid var(--border);color:var(--white)">
+  <div style="max-width:900px;margin:0 auto">
+    <h2 class="sec-title" style="font-family:var(--clash);font-size:clamp(2rem,3vw,2.8rem);font-weight:700;margin-bottom:1.5rem;color:var(--white)">POPIA Compliance</h2>
+    <p style="font-family:var(--general);font-size:.9rem;color:var(--slate);margin-bottom:1.5rem">ScholarTrack complies with the Protection of Personal Information Act 4 of 2013 ("POPIA").</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">Information Regulator registration</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">ScholarTrack is registered with the South African Information Regulator. Registration number: <strong style="color:var(--white)">to be assigned upon deployment</strong>.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">Your POPIA rights</h3>
+    <ul style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem;padding-left:1.5rem">
+      <li><strong style="color:var(--white)">Access</strong> — request a copy of your personal information</li>
+      <li><strong style="color:var(--white)">Correction</strong> — ask us to fix inaccurate data</li>
+      <li><strong style="color:var(--white)">Deletion</strong> — request deletion of your account and data (subject to legal retention)</li>
+      <li><strong style="color:var(--white)">Object</strong> — object to processing for direct marketing or profiling</li>
+      <li><strong style="color:var(--white)">Complain</strong> — lodge a complaint with the Information Regulator: <a href="https://inforegulator.org.za" style="color:var(--amber)">inforegulator.org.za</a></li>
+    </ul>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">Cross-border transfers</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">ScholarTrack uses Supabase (hosted on AWS in eu-west-1 region) for data storage. South African user data may transit to and be stored in the EU region under appropriate safeguards. We rely on POPIA section 72 (binding corporate rules / equivalent safeguards) for these transfers. Backup copies may be stored in additional regions per Supabase's standard infrastructure.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">Security safeguards</h3>
+    <ul style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem;padding-left:1.5rem">
+      <li>Encryption in transit (TLS 1.2+) and at rest (Supabase managed)</li>
+      <li>Row Level Security (RLS) on every table</li>
+      <li>Role-based access control (parent / driver / admin)</li>
+      <li>Audit logs on all mutations</li>
+      <li>Quarterly security review</li>
+      <li>Incident response plan with 72-hour breach notification</li>
+    </ul>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">Data breach notification</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">In the event of a data breach affecting your personal information, we will notify you and the Information Regulator as soon as reasonably possible, and in any case within 72 hours of becoming aware of the breach, in line with POPIA section 22.</p>
+
+    <h3 style="font-family:var(--clash);font-size:1.3rem;font-weight:600;margin:1.5rem 0 .5rem;color:var(--white)">Contact</h3>
+    <p style="font-family:var(--general);font-size:.95rem;color:var(--slate);line-height:1.7;margin-bottom:1rem">Information Officer: <strong style="color:var(--white)">Kgothatso Makena</strong> · <a href="mailto:privacy@scholartrack.co.za" style="color:var(--amber)">privacy@scholartrack.co.za</a> · +27 69 533 7778</p>
+  </div>
+</section>
 <!-- ═══════════════════════════════════════════════════════
      JAVASCRIPT
 ══════════════════════════════════════════════════════ -->
